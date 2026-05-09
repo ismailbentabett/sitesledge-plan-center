@@ -1,4 +1,3 @@
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { isAuthenticated } from '@/lib/auth'
@@ -285,10 +284,10 @@ export default async function DashboardLayout({
         </nav>
 
         <div className="p-2 border-t shrink-0">
-          <form action={async () => {
-            'use server'
-            const cookieStore = cookies()
-            cookieStore.delete('sitesledge-auth')
+          <form action="/api/auth/logout" method="POST" onSubmit={async (e) => {
+            e.preventDefault()
+            await fetch('/api/auth/logout', { method: 'POST' })
+            window.location.href = '/login'
           }}>
             <button type="submit" className="flex items-center gap-2.5 px-2 py-1.5 w-full text-sm rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
