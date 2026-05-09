@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 function formatCurrency(n: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(n)
 }
@@ -10,7 +12,11 @@ export default async function DashboardPage() {
   const currentMonth = now.getMonth() + 1
   const currentYear = now.getFullYear()
 
-  const [activeClients, totalClients, churnedClients, pausedClients, prospectClients, currentFinancial, lastFinancial, allFinancials, openTasks, urgentTasks] = await Promise.all([
+  const [
+    activeClients, totalClients, churnedClients, pausedClients, prospectClients,
+    currentFinancial, lastFinancial, openTasks, urgentTasks,
+    activeNiche, activeOffer, latestWeeklyPlan, pinnedNotes, recentDecisions, boardCount,
+  ] = await Promise.all([
     prisma.client.count({ where: { status: 'active' } }),
     prisma.client.count(),
     prisma.client.count({ where: { status: 'churned' } }),
@@ -18,9 +24,14 @@ export default async function DashboardPage() {
     prisma.client.count({ where: { status: 'prospect' } }),
     prisma.financialRecord.findUnique({ where: { year_month: { year: currentYear, month: currentMonth } } }),
     prisma.financialRecord.findFirst({ where: { OR: [{ year: { lt: currentYear } }, { year: currentYear, month: { lt: currentMonth } }] }, orderBy: [{ year: 'desc' }, { month: 'desc' }] }),
-    prisma.financialRecord.findMany({ orderBy: [{ year: 'desc' }, { month: 'desc' }], take: 12 }),
     prisma.vATask.count({ where: { status: { in: ['todo', 'in_progress'] } } }),
     prisma.vATask.count({ where: { priority: 'urgent', status: { not: 'done' } } }),
+    prisma.niche.findFirst({ where: { status: 'active' }, orderBy: { updatedAt: 'desc' } }),
+    prisma.offer.findFirst({ where: { status: 'active' }, orderBy: { updatedAt: 'desc' } }),
+    prisma.weeklyPlan.findFirst({ orderBy: { weekStartDate: 'desc' } }),
+    prisma.note.findMany({ where: { pinned: true }, orderBy: { updatedAt: 'desc' }, take: 3 }),
+    prisma.decision.findMany({ orderBy: { createdAt: 'desc' }, take: 5 }),
+    prisma.board.count(),
   ])
 
   const currentMrr = currentFinancial?.mrr ?? 0
@@ -77,45 +88,83 @@ export default async function DashboardPage() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-4 border rounded-xl bg-card">
+          <p className="text-sm text-muted-foreground">Active Niche</p>
+          <p className="text-lg font-bold mt-1">{activeNiche?.name || 'Not set'}</p>
+        </div>
+        <div className="p-4 border rounded-xl bg-card">
+          <p className="text-sm text-muted-foreground">Active Offer</p>
+          <p className="text-lg font-bold mt-1">{activeOffer?.name || 'Not set'}</p>
+        </div>
+        <div className="p-4 border rounded-xl bg-card">
+          <p className="text-sm text-muted-foreground">This Week</p>
+          <p className="text-lg font-bold mt-1 truncate">{latestWeeklyPlan?.weeklyGoal || 'Not set'}</p>
+        </div>
+        <div className="p-4 border rounded-xl bg-card">
+          <p className="text-sm text-muted-foreground">Whiteboards</p>
+          <p className="text-2xl font-bold mt-1">{boardCount}</p>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="p-4 border rounded-xl bg-card">
           <h3 className="text-sm font-semibold mb-3">Pillar Status</h3>
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Active</span>
-              <span className="text-sm font-medium">{activePillars}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">In Progress</span>
-              <span className="text-sm font-medium">{inProgressPillars}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Not Started</span>
-              <span className="text-sm font-medium">{notStartedPillars}</span>
-            </div>
+            <div className="flex items-center justify-between"><span className="text-sm text-muted-foreground">Active</span><span className="text-sm font-medium">{activePillars}</span></div>
+            <div className="flex items-center justify-between"><span className="text-sm text-muted-foreground">In Progress</span><span className="text-sm font-medium">{inProgressPillars}</span></div>
+            <div className="flex items-center justify-between"><span className="text-sm text-muted-foreground">Not Started</span><span className="text-sm font-medium">{notStartedPillars}</span></div>
           </div>
         </div>
 
         <div className="p-4 border rounded-xl bg-card">
           <h3 className="text-sm font-semibold mb-3">Client Pipeline</h3>
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Active</span>
-              <span className="text-sm font-medium">{activeClients}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Prospects</span>
-              <span className="text-sm font-medium">{prospectClients}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Paused</span>
-              <span className="text-sm font-medium">{pausedClients}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Churned</span>
-              <span className="text-sm font-medium">{churnedClients}</span>
-            </div>
+            <div className="flex items-center justify-between"><span className="text-sm text-muted-foreground">Active</span><span className="text-sm font-medium">{activeClients}</span></div>
+            <div className="flex items-center justify-between"><span className="text-sm text-muted-foreground">Prospects</span><span className="text-sm font-medium">{prospectClients}</span></div>
+            <div className="flex items-center justify-between"><span className="text-sm text-muted-foreground">Paused</span><span className="text-sm font-medium">{pausedClients}</span></div>
+            <div className="flex items-center justify-between"><span className="text-sm text-muted-foreground">Churned</span><span className="text-sm font-medium">{churnedClients}</span></div>
           </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="p-4 border rounded-xl bg-card">
+          <h3 className="text-sm font-semibold mb-3">Pinned Notes</h3>
+          {pinnedNotes.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No pinned notes</p>
+          ) : (
+            <div className="space-y-2">
+              {pinnedNotes.map((note) => (
+                <div key={note.id} className="flex items-start justify-between py-2 border-b last:border-0">
+                  <div>
+                    <p className="text-sm font-medium">{note.title}</p>
+                    {note.body && <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-xs">{note.body}</p>}
+                  </div>
+                  <Link href="/notes" className="text-xs text-primary hover:text-primary/80 shrink-0">View</Link>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="p-4 border rounded-xl bg-card">
+          <h3 className="text-sm font-semibold mb-3">Recent Decisions</h3>
+          {recentDecisions.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No decisions yet</p>
+          ) : (
+            <div className="space-y-2">
+              {recentDecisions.map((d) => (
+                <div key={d.id} className="flex items-start justify-between py-2 border-b last:border-0">
+                  <div>
+                    <p className="text-sm font-medium">{d.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{d.status}</p>
+                  </div>
+                  <Link href="/decisions" className="text-xs text-primary hover:text-primary/80 shrink-0">View</Link>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -136,18 +185,6 @@ export default async function DashboardPage() {
             ))}
           </div>
         )}
-      </div>
-
-      <div className="flex gap-3">
-        <Link href="/clients" className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 transition-colors">
-          Manage Clients
-        </Link>
-        <Link href="/va-tasks" className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium border border-input rounded-md hover:bg-accent transition-colors">
-          View Tasks
-        </Link>
-        <Link href="/financials" className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium border border-input rounded-md hover:bg-accent transition-colors">
-          Financials
-        </Link>
       </div>
     </div>
   )

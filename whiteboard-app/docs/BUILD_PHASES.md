@@ -1,6 +1,6 @@
 # Build Phases — SiteSledge Command Center
 
-## Milestone 1: Foundation & Planning (Current)
+## Milestone 1: Foundation & Planning (Complete)
 **Phases 0–5** — Docs, audit, tooling verification
 
 | Phase | Name | Status |
@@ -8,11 +8,11 @@
 | 0 | Git checkpoint | Done |
 | 1 | AGENTS.md update | Done |
 | 2 | Audit + CURRENT_STATE.md + cleanup | Done |
-| 3 | Full planning docs | In Progress |
-| 4 | Critical plan review | Pending |
-| 5 | Verify scripts | Pending |
+| 3 | Full planning docs | Done |
+| 4 | Critical plan review | Done |
+| 5 | Verify scripts | Done |
 
-## Milestone 2: Core Planning Hub
+## Milestone 2: Core Planning Hub (Complete)
 **Phases 6–18** — First usable version of the planning suite
 
 | Phase | Name | Route | New Models |
