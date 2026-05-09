@@ -13,6 +13,8 @@ model Board {
   stateJson  String   @default("{}")
   isPublic   Boolean  @default(false)
   publicId   String   @unique @default(cuid())
+  linkedType String?
+  linkedId   String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -21,7 +23,7 @@ model Board {
 }
 
 model Client {
-  id            String   @id @default(cuid())
+  id            String       @id @default(cuid())
   businessName  String
   contactName   String
   email         String
@@ -31,27 +33,27 @@ model Client {
   monthlyPrice  Int
   startDate     DateTime?
   churnDate     DateTime?
-  notes         String   @default("")
+  notes         String       @default("")
   pillars       Pillar[]
   vaTasks       VATask[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   @@index([status])
   @@map("clients")
 }
 
 model Pillar {
-  id          String      @id @default(cuid())
+  id          String       @id @default(cuid())
   clientId    String
-  client      Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client      Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
   type        PillarType
   status      PillarStatus @default(not_started)
-  notes       String      @default("")
+  notes       String       @default("")
   setupDate   DateTime?
   lastReview  DateTime?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   @@unique([clientId, type])
   @@index([clientId])
@@ -77,22 +79,181 @@ model FinancialRecord {
 }
 
 model VATask {
-  id          String     @id @default(cuid())
+  id          String       @id @default(cuid())
   title       String
-  description String     @default("")
-  assignedTo  String     @default("")
-  status      TaskStatus @default(todo)
+  description String       @default("")
+  assignedTo  String       @default("")
+  status      TaskStatus   @default(todo)
   priority    TaskPriority @default(medium)
   dueDate     DateTime?
   clientId    String?
-  client      Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  client      Client?      @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   @@index([status])
   @@index([clientId])
   @@index([priority])
   @@map("va_tasks")
+}
+
+model BusinessModel {
+  id                  String   @id @default(cuid())
+  name                String
+  targetCustomer      String
+  coreProblem         String
+  mainPromise         String
+  mechanism           String
+  priceMin            Int
+  priceMax            Int
+  setupFee            Int?
+  fulfillmentCostMin  Int?
+  fulfillmentCostMax  Int?
+  corePillars         String   @default("[]")
+  acquisitionChannels String   @default("")
+  fulfillmentProcess  String   @default("")
+  retentionMechanism  String   @default("")
+  notes               String   @default("")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("business_models")
+}
+
+model Niche {
+  id                          String      @id @default(cuid())
+  name                        String
+  description                 String      @default("")
+  averageTicketValue          Int?
+  repeatPurchasePotentialScore Int        @default(3)
+  callVolumeScore             Int         @default(3)
+  reviewImportanceScore       Int         @default(3)
+  websiteQualityGapScore      Int         @default(3)
+  competitionLevelScore       Int         @default(3)
+  ownerSophisticationScore    Int         @default(3)
+  urgencyScore                Int         @default(3)
+  easeOfFindingLeadsScore     Int         @default(3)
+  easeOfFulfillmentScore      Int         @default(3)
+  retentionPotentialScore     Int         @default(3)
+  affordabilityScore          Int         @default(3)
+  offerAngle                  String      @default("")
+  outreachAngle               String      @default("")
+  objections                  String      @default("")
+  notes                       String      @default("")
+  status                      NicheStatus @default(researching)
+  createdAt                   DateTime    @default(now())
+  updatedAt                   DateTime    @updatedAt
+
+  @@index([status])
+  @@map("niches")
+}
+
+model Offer {
+  id                  String      @id @default(cuid())
+  name                String
+  targetNicheId       String?
+  status              OfferStatus @default(draft)
+  priceMonthly        Int
+  setupFee            Int?
+  mainPromise         String      @default("")
+  mechanism           String      @default("")
+  includedAssets      String      @default("")
+  bonuses             String      @default("")
+  guarantee           String      @default("")
+  riskReversal        String      @default("")
+  urgencyAngle        String      @default("")
+  scarcityAngle       String      @default("")
+  primaryObjection    String      @default("")
+  objectionResponse   String      @default("")
+  coldEmailVersion    String      @default("")
+  coldCallVersion     String      @default("")
+  landingPageHeadline String      @default("")
+  metaAdAngle         String      @default("")
+  notes               String      @default("")
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  @@index([status])
+  @@map("offers")
+}
+
+model FinancialScenario {
+  id                String   @id @default(cuid())
+  name              String
+  averageMonthlyPrice Int
+  setupFee          Int?
+  currentClients    Int      @default(0)
+  newClientsPerMonth Int    @default(0)
+  monthlyChurnRate  Float    @default(0)
+  vaSetupCost       Int?
+  softwareCostPerClient Int?
+  monthlyFixedCosts Int      @default(0)
+  adSpend           Int      @default(0)
+  bookedCallCost    Int?
+  closeRate         Float    @default(0)
+  monthsToProject   Int      @default(12)
+  notes             String   @default("")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("financial_scenarios")
+}
+
+model WeeklyPlan {
+  id                String   @id @default(cuid())
+  weekStartDate     DateTime
+  weekEndDate       DateTime
+  previousWeekReview String  @default("")
+  whatWorked        String   @default("")
+  whatDidNotWork    String   @default("")
+  mainBottleneck    String   @default("")
+  mainMetric        String   @default("")
+  weeklyGoal        String   @default("")
+  topPriorities     String   @default("")
+  salesActions      String   @default("")
+  fulfillmentActions String  @default("")
+  systemActions     String   @default("")
+  delegatedTasks    String   @default("")
+  stoppedTasks      String   @default("")
+  notes             String   @default("")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([weekStartDate])
+  @@map("weekly_plans")
+}
+
+model Note {
+  id         String   @id @default(cuid())
+  title      String
+  body       String   @default("")
+  tags       String   @default("[]")
+  pinned     Boolean  @default(false)
+  linkedType String?
+  linkedId   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([pinned])
+  @@map("notes")
+}
+
+model Decision {
+  id               String         @id @default(cuid())
+  title            String
+  context          String         @default("")
+  optionsConsidered String        @default("")
+  chosenOption     String         @default("")
+  reason           String         @default("")
+  expectedResult   String         @default("")
+  reviewDate       DateTime?
+  outcome          String         @default("")
+  status           DecisionStatus @default(open)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([status])
+  @@map("decisions")
 }
 
 enum ClientStatus {
@@ -128,4 +289,28 @@ enum TaskPriority {
   medium
   high
   urgent
+}
+
+enum NicheStatus {
+  researching
+  testing
+  active
+  paused
+  rejected
+}
+
+enum OfferStatus {
+  draft
+  testing
+  active
+  paused
+  retired
+}
+
+enum DecisionStatus {
+  open
+  decided
+  reviewing
+  validated
+  reversed
 }
