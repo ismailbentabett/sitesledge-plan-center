@@ -49,4 +49,27 @@
 
 ## Planning Review Decisions
 
-*(To be filled during Phase 4)*
+### 1. DATA_MODEL Relation Fixes
+- **Decision**: Add missing relation fields to Client→Niche, ReviewTracker→Client, FulfillmentTask→Client
+- **Reason**: Initial DATA_MODEL.md had FK fields without Prisma relation declarations. Fixed during review.
+- **Date**: 2026-05-09
+
+### 2. Dashboard Route Conflict
+- **Decision**: Delete `app/dashboard/page.tsx` (client-side whiteboard list) — it is shadowed by `app/(dashboard)/page.tsx`
+- **Reason**: Next.js route groups take precedence. The standalone `dashboard/page.tsx` is dead code. Whiteboards will get their own `/whiteboards` route.
+- **Date**: 2026-05-09
+
+### 3. Existing Dashboard Preservation
+- **Decision**: Extend the existing `(dashboard)/page.tsx` business dashboard rather than rebuild from scratch
+- **Reason**: It already queries real data (MRR, clients, tasks, pillars, financials) and displays it correctly. We'll add new widgets for Phase 1 modules.
+- **Date**: 2026-05-09
+
+### 4. Sidebar Rebuild
+- **Decision**: Rebuild `(dashboard)/layout.tsx` sidebar to match the full navigation tree
+- **Reason**: Current sidebar has 7 items linking to pages that don't exist (404). New sidebar will have grouped sections with disabled/coming-soon states for unbuilt modules.
+- **Date**: 2026-05-09
+
+### 5. Client.businessType Legacy Field
+- **Decision**: Keep `Client.businessType` as a legacy field; new `Client.nicheId` will supersede it
+- **Reason**: Existing data uses businessType as a free-text niche identifier. Migration will map existing values to Niche records where possible.
+- **Date**: 2026-05-09

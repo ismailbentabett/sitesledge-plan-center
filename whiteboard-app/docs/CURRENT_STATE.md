@@ -60,6 +60,8 @@ pnpm dev
 
 **Broken links**: The sidebar in `(dashboard)/layout.tsx` links to `/clients`, `/pillars`, `/financials`, `/va-tasks`, `/whiteboards`, `/settings` — but only `/dashboard` has a page. The others have API routes but no UI pages.
 
+**Dead route**: `app/dashboard/page.tsx` (client-side whiteboard list) is shadowed by `app/(dashboard)/page.tsx`. Will be deleted in Milestone 2.
+
 ## Existing API Routes
 
 | Route | Methods | Auth | Description |

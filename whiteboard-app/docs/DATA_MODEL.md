@@ -27,6 +27,7 @@ model Client {
   phone                 String
   businessType          String       // legacy — will map to niche
   nicheId               String?      // NEW: relation to Niche
+  niche                 Niche?       @relation(fields: [nicheId], references: [id])
   packageName           String?      // NEW
   monthlyPrice          Int
   setupFee              Int?         // NEW
@@ -473,7 +474,9 @@ model WebsiteTemplate {
 ```prisma
 model ReviewTracker {
   id                          String   @id @default(cuid())
-  clientId                    String   @unique
+    clientId    String
+  client      Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)   @unique
+  client                      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   currentGoogleRating         Float    @default(0)
   currentReviewCount          Int      @default(0)
   targetReviewCount           Int      @default(0)
