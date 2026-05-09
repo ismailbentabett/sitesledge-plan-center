@@ -1,64 +1,48 @@
-import { NextAuthOptions } from 'next-auth'
-import CredentialsProvider from 'next-auth/providers/credentials'
-import { prisma } from './prisma'
-import bcrypt from 'bcryptjs'
+import { cookies } from 'next/headers'
 
-export const authOptions: NextAuthOptions = {
-  providers: [
-    CredentialsProvider({
-      name: 'Credentials',
-      credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null
-        }
+const AUTH_COOKIE_NAME = 'sitesledge-auth'
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        })
+export function getAdminPassword(): string {
+  const pwd = process.env.ADMIN_PASSWORD
+  if (!pwd) throw new Error('ADMIN_PASSWORD environment variable is not set')
+  return pwd
+}
 
-        if (!user) {
-          return null
-        }
+export async function isAuthenticated(): Promise<boolean> {
+  const cookieStore = cookies()
+  const token = cookieStore.get(AUTH_COOKIE_NAME)
+  if (!token) return false
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.passwordHash
-        )
+  try {
+    const payload = JSON.parse(token.value)
+    if (payload.authenticated !== true) return false
 
-        if (!isPasswordValid) {
-          return null
-        }
+    const age = Date.now() - payload.timestamp
+    if (age > 7 * 24 * 60 * 60 * 1000) return false
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-        }
-      },
-    }),
-  ],
-  session: {
-    strategy: 'jwt',
-  },
-  pages: {
-    signIn: '/login',
-  },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id
-      }
-      return token
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string
-      }
-      return session
-    },
-  },
+    return true
+  } catch {
+    return false
+  }
+}
+
+export async function setAuthCookie() {
+  const cookieStore = cookies()
+  const payload = JSON.stringify({
+    authenticated: true,
+    timestamp: Date.now(),
+  })
+
+  cookieStore.set(AUTH_COOKIE_NAME, payload, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60,
+    path: '/',
+  })
+}
+
+export async function clearAuthCookie() {
+  const cookieStore = cookies()
+  cookieStore.delete(AUTH_COOKIE_NAME)
 }

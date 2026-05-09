@@ -1,0 +1,3026 @@
+Below is a **0 → 100% OpenCode execution plan**.
+
+Use it exactly like this:
+
+1. Create docs and rules.
+2. Audit the current whiteboard app.
+3. Build one slice at a time.
+4. Run checks after every slice.
+5. Commit after every slice.
+6. Do not let OpenCode expand scope randomly.
+
+---
+
+# Ground rules for using OpenCode
+
+Do **not** give OpenCode one giant “build everything” prompt.
+
+Use this pattern:
+
+```text
+Plan → Implement slice → Test → Fix → Commit → Next slice
+```
+
+Your current app already has the whiteboard working, so the job is now to build the **private planning suite around it**.
+
+---
+
+# Phase 0 — Backup current working app
+
+Before touching anything:
+
+```bash
+git status
+git add .
+git commit -m "Checkpoint working whiteboard app"
+```
+
+If you do not have Git initialized:
+
+```bash
+git init
+git add .
+git commit -m "Initial working whiteboard app"
+```
+
+---
+
+# Phase 1 — Create permanent project rules
+
+Give OpenCode this prompt:
+
+```text
+Create a project instruction file called AGENTS.md.
+
+This app is called SiteSledge Command Center.
+
+It is a private internal business planning app for one owner.
+
+Business context:
+- I run a GoHighLevel-based local business marketing system.
+- I sell a low-ticket recurring marketing foundation system to local service businesses.
+- Monthly price target: $97 to $297.
+- Core pillars: SEO website, automated Google review requests, missed-call text-back automation, and database reactivation.
+- Fulfillment is standardized and later delegated to VAs.
+- Target: 100+ low-churn clients.
+
+Product rules:
+- This is NOT a SaaS product.
+- Do NOT add signup.
+- Do NOT add registration.
+- Do NOT add client accounts.
+- Do NOT add public users.
+- Do NOT add multi-tenant logic.
+- This is for my private use only.
+
+Access rules:
+- Use a single private password gate or single admin access.
+- Prefer a password gate using an environment variable.
+- Password must come from environment variable.
+- Protect all planning pages.
+- No registration page.
+- No public account creation.
+
+Tech stack:
+- Keep the existing stack.
+- Keep the existing working Excalidraw whiteboard.
+- Use Next.js App Router.
+- Use TypeScript.
+- Use Tailwind.
+- Use PostgreSQL and Prisma if already installed.
+- Use Zod for validation.
+- Use Docker Compose if already installed.
+- Use pnpm.
+
+Engineering rules:
+- Do not break the existing whiteboard.
+- Do not rewrite working systems unless necessary.
+- Do not use tldraw.
+- Do not use paid-license canvas SDKs.
+- Do not use localStorage as the main database.
+- Do not fake persistence.
+- All business records must persist in PostgreSQL.
+- Use TypeScript everywhere.
+- Avoid `any` unless absolutely necessary.
+- Use Zod validation for inputs.
+- Keep components reusable.
+- Keep server/database logic separate from UI components.
+- Do not leave TODOs for core functionality.
+- Do not remove features to make the build pass.
+
+Build process:
+Before each implementation:
+1. Read AGENTS.md.
+2. Read docs in /docs.
+3. Confirm the slice scope.
+4. Implement only that slice.
+5. Run checks.
+6. Fix errors.
+7. Update docs if implementation differs.
+
+Required checks after each slice:
+- pnpm lint
+- pnpm typecheck if available
+- pnpm build
+
+If typecheck script does not exist, add a proper typecheck script.
+
+When finished with any slice, report:
+- What changed
+- Files changed
+- Commands run
+- Errors found
+- Errors fixed
+- Remaining limitations
+```
+
+Then commit:
+
+```bash
+git add .
+git commit -m "Add project agent instructions"
+```
+
+---
+
+# Phase 2 — Audit the current app
+
+Give OpenCode this prompt:
+
+```text
+Read AGENTS.md.
+
+Audit the current app.
+
+Do not implement new features yet.
+
+Inspect:
+1. Current project structure
+2. Existing whiteboard implementation
+3. Existing database setup
+4. Existing Prisma schema if present
+5. Existing Docker setup if present
+6. Existing routes/pages
+7. Existing API routes/server actions
+8. Existing environment variables
+9. Existing package scripts
+10. Existing persistence method for whiteboard
+
+Create a file:
+
+/docs/CURRENT_STATE.md
+
+Include:
+- Current tech stack detected
+- Existing pages
+- Existing API routes
+- Existing database models
+- Existing components
+- How whiteboard persistence works
+- How to run the app
+- What is working
+- What is fragile
+- What must not be broken
+- Missing scripts or setup issues
+
+Do not change application code unless needed to add docs only.
+```
+
+Then commit:
+
+```bash
+git add .
+git commit -m "Document current app state"
+```
+
+---
+
+# Phase 3 — Create full planning docs
+
+Give OpenCode this prompt:
+
+```text
+Read AGENTS.md and /docs/CURRENT_STATE.md.
+
+Create the full planning documentation for SiteSledge Command Center.
+
+Do not implement app features yet.
+
+Create or update these files:
+
+/docs/PRODUCT_SPEC.md
+/docs/MODULE_MAP.md
+/docs/DATA_MODEL.md
+/docs/ROUTES_AND_PAGES.md
+/docs/API_SPEC.md
+/docs/UI_SPEC.md
+/docs/BUILD_PHASES.md
+/docs/ACCEPTANCE_TESTS.md
+/docs/DECISIONS.md
+
+The product is a private business planning and operating system for my GoHighLevel-based local service marketing business.
+
+The full future module list should include:
+
+1. Command Dashboard
+2. Business Model Planner
+3. Niche Research Hub
+4. Offer Builder
+5. Productized Service Builder
+6. Funnel Planner
+7. Outreach Planner
+8. Script Library
+9. Sales Pipeline
+10. Client Tracker
+11. Fulfillment Tracker
+12. SOP Library
+13. VA Task System
+14. Financial Model
+15. Churn & Retention Planner
+16. Review System Planner
+17. Website Template Library
+18. Automation Map
+19. CRM Import/Data Room
+20. Metrics Dashboard
+21. Experiment Tracker
+22. Whiteboard
+23. Notes
+24. Decision Log
+25. Weekly Planning Room
+26. Future AI Strategy Assistant
+
+Define phased implementation:
+
+Phase 1:
+- Password gate/private access if missing
+- App shell/sidebar
+- Command Dashboard
+- Business Model Planner
+- Niche Research Hub
+- Offer Builder
+- Financial Model
+- Weekly Planning Room
+- Notes
+- Decision Log
+- Existing Whiteboard integration cleanup if needed
+
+Phase 2:
+- Outreach Planner
+- Script Library
+- Sales Pipeline
+- Experiment Tracker
+- Funnel Planner
+
+Phase 3:
+- Client Tracker
+- Fulfillment Tracker
+- SOP Library
+- VA Task System
+- Automation Map
+- Website Template Library
+- Review System Planner
+- Churn & Retention Planner
+
+Phase 4:
+- CSV Import/Data Room
+- Metrics Dashboard
+- Reports
+- Future CRM integration placeholders
+
+Documentation requirements:
+- Define every module clearly.
+- Define database models for each phase.
+- Define routes/pages.
+- Define API routes or server actions.
+- Define sidebar navigation.
+- Define dashboard widgets.
+- Define acceptance tests per phase.
+- Define edge cases and risks.
+- Make sure the docs reflect the current app state from CURRENT_STATE.md.
+- Do not propose replacing the working whiteboard unless absolutely necessary.
+
+Do not code features yet.
+```
+
+Then commit:
+
+```bash
+git add .
+git commit -m "Add product planning documentation"
+```
+
+---
+
+# Phase 4 — Critical plan review
+
+Give OpenCode this prompt:
+
+```text
+Read AGENTS.md and all docs in /docs.
+
+Critically review the planning docs.
+
+Do not implement app features yet.
+
+Find and fix:
+1. Missing modules
+2. Overcomplicated modules
+3. Underdefined database models
+4. Missing routes
+5. Missing acceptance tests
+6. Features placed in the wrong phase
+7. Any SaaS-style logic that should not exist
+8. Any signup/registration/public account assumption
+9. Anything that could break the existing whiteboard
+10. Any mismatch between CURRENT_STATE.md and the future plan
+
+Update the docs.
+
+Add a section to /docs/DECISIONS.md called “Planning Review Decisions” and list the corrections made.
+```
+
+Then commit:
+
+```bash
+git add .
+git commit -m "Review and correct planning docs"
+```
+
+---
+
+# Phase 5 — Add or fix typecheck script
+
+Give OpenCode this prompt:
+
+```text
+Read AGENTS.md.
+
+Inspect package.json.
+
+Make sure these scripts exist and work:
+
+- dev
+- build
+- lint
+- typecheck
+
+If typecheck is missing, add:
+"Typecheck should run TypeScript without emitting files."
+
+Use the correct command for this project.
+
+Then run:
+pnpm lint
+pnpm typecheck
+pnpm build
+
+Fix only script/config issues needed to make the existing app checks run.
+
+Do not add new product features.
+Do not change whiteboard behavior.
+```
+
+Then commit:
+
+```bash
+git add .
+git commit -m "Add and verify project check scripts"
+```
+
+---
+
+# Phase 6 — Private access / password gate
+
+Skip this only if your current app already has private password access.
+
+Give OpenCode this prompt:
+
+```text
+Read AGENTS.md and /docs/CURRENT_STATE.md.
+
+Implement Phase 1 Slice 1: private access.
+
+Scope:
+- Add a password gate if one does not exist.
+- Use environment variable PLANNING_HUB_PASSWORD.
+- Add PLANNING_HUB_PASSWORD to .env.example.
+- Protect all app pages except the unlock/password page and required static assets.
+- Use a secure HTTP-only cookie or equivalent server-side session method.
+- Add logout.
+- Do not add signup.
+- Do not add registration.
+- Do not add users table unless the current app already uses one and it is necessary.
+- Do not add public accounts.
+- Do not break the existing whiteboard.
+
+Routes:
+- /unlock or existing password page
+- protected app routes redirect to /unlock if locked
+
+Acceptance tests:
+1. Visiting dashboard while locked redirects to unlock page.
+2. Wrong password shows error.
+3. Correct password unlocks the app.
+4. Refresh keeps access.
+5. Logout locks the app again.
+6. Whiteboard remains accessible after unlock.
+7. No signup or registration pages exist.
+
+After implementation:
+- Run pnpm lint
+- Run pnpm typecheck
+- Run pnpm build
+- Fix all errors
+- Update /docs/DECISIONS.md if implementation differs from plan
+```
+
+Then commit:
+
+```bash
+git add .
+git commit -m "Implement private password gate"
+```
+
+---
+
+# Phase 7 — App shell and sidebar
+
+Give OpenCode this prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Implement Phase 1 Slice 2: app shell and sidebar.
+
+Scope:
+- Create a private app layout with dark mode style.
+- Add sidebar navigation.
+- Add top bar.
+- Keep the existing whiteboard route working.
+- Do not change whiteboard internals unless needed for navigation.
+- Use simple, dense, functional UI.
+
+Sidebar structure:
+
+Dashboard
+
+Plan
+- Business Model
+- Niches
+- Offers
+- Financial Model
+- Weekly Planning
+
+Workspace
+- Whiteboards
+- Notes
+- Decision Log
+
+Later / Disabled sections may appear but should not link to broken pages:
+Sales
+- Outreach
+- Scripts
+- Pipeline
+- Experiments
+
+Clients
+- Client Tracker
+- Fulfillment
+- SOPs
+- VA Tasks
+
+Data
+- Imports
+- Metrics
+- Reports
+
+Requirements:
+- Current active route should be visually highlighted.
+- Mobile can be basic but must not break.
+- No fake SaaS marketing UI.
+- No signup/login links except logout/password gate.
+
+Acceptance tests:
+1. Sidebar appears on protected pages.
+2. Dashboard link works.
+3. Whiteboard link works.
+4. Logout works.
+5. No broken active Phase 1 links.
+6. Existing whiteboard still works.
+
+Run lint, typecheck, and build. Fix errors.
+```
+
+Then commit:
+
+```bash
+git add .
+git commit -m "Add private app shell and sidebar"
+```
+
+---
+
+# Phase 8 — Command Dashboard
+
+Give OpenCode this prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Implement Phase 1 Slice 3: Command Dashboard.
+
+Route:
+- /dashboard
+
+Purpose:
+The dashboard should show the current state of the business using real persisted data where available and empty states where no data exists.
+
+Widgets:
+- Current MRR
+- Active clients placeholder/count if clients table does not exist yet
+- Active prospects placeholder/count if prospects table does not exist yet
+- Current niche focus
+- Current offer focus
+- This week's priority
+- Open weekly actions
+- Notes pinned
+- Recent decisions
+- Whiteboards count
+- Financial scenario summary
+
+Important:
+- Do not fake numbers.
+- If data does not exist yet, show clear empty states.
+- Pull real data from existing Phase 1 tables when available.
+- It is acceptable for some widgets to say “Not set yet” until the relevant module exists.
+
+Create reusable dashboard card components.
+
+Acceptance tests:
+1. /dashboard loads after unlock.
+2. Dashboard shows empty states if no records exist.
+3. Dashboard does not use hardcoded fake business numbers.
+4. Dashboard uses real counts where tables already exist.
+5. Build passes.
+
+Run lint, typecheck, and build. Fix errors.
+```
+
+Then commit:
+
+```bash
+git add .
+git commit -m "Implement command dashboard"
+```
+
+---
+
+# Phase 9 — Shared CRUD foundation
+
+Before building modules, make OpenCode create reusable patterns.
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Implement Phase 1 Slice 4: shared CRUD foundation.
+
+Scope:
+Create reusable patterns/components/utilities for planning modules.
+
+Needed utilities/components:
+- PageHeader
+- EmptyState
+- ConfirmDeleteButton or equivalent
+- FormField components if useful
+- StatusBadge if useful
+- Data table/list layout
+- Server-side validation pattern using Zod
+- Shared date formatting utility
+- Shared currency/percentage formatting utility
+- Prisma access pattern if not already clean
+
+Do not build new business modules yet unless needed to support the foundation.
+
+Requirements:
+- Keep components simple.
+- Avoid overengineering.
+- Do not introduce a large UI library unless already used.
+- Do not break existing whiteboard or dashboard.
+
+Run lint, typecheck, and build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Add shared CRUD foundation"
+```
+
+---
+
+# Phase 10 — Business Model Planner
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Implement Phase 1 Slice 5: Business Model Planner.
+
+Route:
+- /business-model
+
+Purpose:
+Store and edit the core business model assumptions.
+
+Database:
+Create or update a BusinessModel table/model with fields similar to:
+- id
+- name
+- targetCustomer
+- coreProblem
+- mainPromise
+- mechanism
+- priceMin
+- priceMax
+- setupFee
+- fulfillmentCostMin
+- fulfillmentCostMax
+- corePillars as JSON or structured text
+- acquisitionChannels
+- fulfillmentProcess
+- retentionMechanism
+- notes
+- createdAt
+- updatedAt
+
+Features:
+- View current business model
+- Create if none exists
+- Edit existing business model
+- Save to PostgreSQL
+- Validate inputs with Zod
+- Show empty state if none exists
+
+Default business context may be used only as starter text if creating the first model, but it must be editable and persisted.
+
+Core pillars:
+1. SEO website
+2. Google review automation
+3. Missed-call text-back
+4. Database reactivation
+
+Acceptance tests:
+1. User can open /business-model.
+2. User can create/save business model.
+3. User can edit and save.
+4. Refresh preserves saved data.
+5. Dashboard can read current business model focus if relevant.
+6. No fake localStorage persistence.
+7. Build passes.
+
+Run:
+pnpm lint
+pnpm typecheck
+pnpm build
+
+Fix all errors.
+Update docs if needed.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement business model planner"
+```
+
+---
+
+# Phase 11 — Niche Research Hub
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Implement Phase 1 Slice 6: Niche Research Hub.
+
+Route:
+- /niches
+- /niches/[id] if useful
+
+Database:
+Create a Niche model with fields:
+- id
+- name
+- description
+- averageTicketValue
+- repeatPurchasePotentialScore
+- callVolumeScore
+- reviewImportanceScore
+- websiteQualityGapScore
+- competitionLevelScore
+- ownerSophisticationScore
+- urgencyScore
+- easeOfFindingLeadsScore
+- easeOfFulfillmentScore
+- retentionPotentialScore
+- affordabilityScore
+- offerAngle
+- outreachAngle
+- objections
+- notes
+- status
+- createdAt
+- updatedAt
+
+Scores should generally be 1 to 5.
+
+Calculate:
+- opportunityScore
+
+Features:
+- List niches
+- Create niche
+- Edit niche
+- Delete niche
+- View opportunity score
+- Sort by opportunity score
+- Mark status:
+  - Researching
+  - Testing
+  - Active
+  - Paused
+  - Rejected
+
+Useful starter niches may be seeded only if there is no data and only if implemented cleanly:
+- Landscapers
+- Dog groomers
+- Med spas
+- Roofers
+- HVAC
+- Plumbers
+- Pest control
+- House cleaners
+- Pressure washing
+- Auto detailers
+- Junk removal
+- Towing companies
+
+Acceptance tests:
+1. Can create niche.
+2. Can edit niche.
+3. Can delete niche.
+4. Score calculates correctly.
+5. Refresh preserves records.
+6. Dashboard can show current/active niche if available.
+7. Build passes.
+
+Run lint, typecheck, and build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement niche research hub"
+```
+
+---
+
+# Phase 12 — Offer Builder
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Implement Phase 1 Slice 7: Offer Builder.
+
+Route:
+- /offers
+- /offers/[id] if useful
+
+Database:
+Create Offer model with fields:
+- id
+- name
+- targetNicheId optional relation to Niche
+- status
+- priceMonthly
+- setupFee
+- mainPromise
+- mechanism
+- includedAssets
+- bonuses
+- guarantee
+- riskReversal
+- urgencyAngle
+- scarcityAngle
+- primaryObjection
+- objectionResponse
+- coldEmailVersion
+- coldCallVersion
+- landingPageHeadline
+- metaAdAngle
+- notes
+- createdAt
+- updatedAt
+
+Statuses:
+- Draft
+- Testing
+- Active
+- Paused
+- Retired
+
+Features:
+- List offers
+- Create offer
+- Edit offer
+- Delete offer
+- Link offer to niche if niches exist
+- Mark active offer
+- Show offer positioning clearly
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create offer.
+2. Can edit offer.
+3. Can delete offer.
+4. Can link offer to niche.
+5. Dashboard can show active offer.
+6. Refresh preserves data.
+7. Build passes.
+
+Run lint, typecheck, and build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement offer builder"
+```
+
+---
+
+# Phase 13 — Financial Model
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Implement Phase 1 Slice 8: Financial Model.
+
+Route:
+- /financial-model
+
+Purpose:
+Help model the economics of the GoHighLevel reselling business.
+
+Database:
+Create FinancialScenario model with fields:
+- id
+- name
+- averageMonthlyPrice
+- setupFee
+- currentClients
+- newClientsPerMonth
+- monthlyChurnRate
+- vaSetupCost
+- softwareCostPerClient
+- monthlyFixedCosts
+- adSpend
+- bookedCallCost
+- closeRate
+- monthsToProject
+- notes
+- createdAt
+- updatedAt
+
+Features:
+- Create scenario
+- Edit scenario
+- Delete scenario
+- Duplicate scenario
+- Default scenarios if none exist:
+  - Conservative
+  - Base
+  - Aggressive
+- Calculate outputs:
+  - MRR
+  - ARR
+  - setup revenue
+  - gross margin estimate
+  - projected clients after N months
+  - projected MRR after N months
+  - churned clients
+  - net new clients
+  - fixed costs
+  - estimated monthly profit
+  - break-even estimate
+- Keep calculations in a separate utility file.
+- Use real formulas, not fake numbers.
+- Validate with Zod.
+
+Acceptance tests:
+1. Can create scenario.
+2. Can edit assumptions.
+3. Calculations update correctly.
+4. Refresh preserves scenario.
+5. Dashboard can show selected/base scenario.
+6. Build passes.
+
+Run lint, typecheck, and build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement financial model"
+```
+
+---
+
+# Phase 14 — Weekly Planning Room
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Implement Phase 1 Slice 9: Weekly Planning Room.
+
+Route:
+- /weekly-planning
+
+Database:
+Create WeeklyPlan model with fields:
+- id
+- weekStartDate
+- weekEndDate
+- previousWeekReview
+- whatWorked
+- whatDidNotWork
+- mainBottleneck
+- mainMetric
+- weeklyGoal
+- topPriorities
+- salesActions
+- fulfillmentActions
+- systemActions
+- delegatedTasks
+- stoppedTasks
+- notes
+- createdAt
+- updatedAt
+
+Features:
+- List weekly plans
+- Create current week plan
+- Edit weekly plan
+- Delete weekly plan
+- Mark current week
+- Show latest plan on dashboard
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create weekly plan.
+2. Can edit weekly plan.
+3. Latest/current week appears on dashboard.
+4. Refresh preserves data.
+5. Build passes.
+
+Run lint, typecheck, and build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement weekly planning room"
+```
+
+---
+
+# Phase 15 — Notes
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Implement Phase 1 Slice 10: Notes.
+
+Route:
+- /notes
+- /notes/[id] if useful
+
+Database:
+Create Note model with fields:
+- id
+- title
+- body
+- tags
+- pinned
+- linkedType
+- linkedId
+- createdAt
+- updatedAt
+
+Features:
+- List notes
+- Create note
+- Edit note
+- Delete note
+- Pin/unpin note
+- Filter by tag if simple
+- Search by title/body if simple
+- Show pinned notes on dashboard
+- Markdown textarea is acceptable; full markdown editor is not required.
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create note.
+2. Can edit note.
+3. Can pin note.
+4. Pinned note appears on dashboard.
+5. Refresh preserves data.
+6. Build passes.
+
+Run lint, typecheck, and build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement notes"
+```
+
+---
+
+# Phase 16 — Decision Log
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Implement Phase 1 Slice 11: Decision Log.
+
+Route:
+- /decisions
+- /decisions/[id] if useful
+
+Database:
+Create Decision model with fields:
+- id
+- title
+- context
+- optionsConsidered
+- chosenOption
+- reason
+- expectedResult
+- reviewDate
+- outcome
+- status
+- createdAt
+- updatedAt
+
+Statuses:
+- Open
+- Decided
+- Reviewing
+- Validated
+- Reversed
+
+Features:
+- List decisions
+- Create decision
+- Edit decision
+- Delete decision
+- Filter by status if simple
+- Show recent decisions on dashboard
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create decision.
+2. Can edit decision.
+3. Can update status.
+4. Recent decisions appear on dashboard.
+5. Refresh preserves data.
+6. Build passes.
+
+Run lint, typecheck, and build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement decision log"
+```
+
+---
+
+# Phase 17 — Whiteboard cleanup and linking
+
+Your whiteboard already works. Do not rebuild it. Improve it carefully.
+
+Prompt:
+
+```text
+Read AGENTS.md, /docs/CURRENT_STATE.md, and the existing whiteboard code.
+
+Implement Phase 1 Slice 12: whiteboard cleanup and planning integration.
+
+Important:
+The whiteboard already works. Do not rewrite it from scratch.
+
+Scope:
+- Keep existing Excalidraw whiteboard functionality.
+- Make sure whiteboards are visible from the app sidebar.
+- Make sure whiteboard list/create/open/delete/rename works if not already done.
+- Make sure whiteboard persistence remains PostgreSQL-backed if currently configured.
+- Add optional fields for linking whiteboards to planning records:
+  - linkedType
+  - linkedId
+- Allow creating a general whiteboard with no linked record.
+- Add save status if missing:
+  - Saved
+  - Saving
+  - Unsaved changes
+  - Error
+- Add manual save button if missing.
+- Keep autosave.
+- Do not use localStorage as the main persistence layer.
+- Do not use tldraw.
+
+Acceptance tests:
+1. Existing whiteboards still open.
+2. Can create new whiteboard.
+3. Can draw.
+4. Can save.
+5. Refresh restores drawing.
+6. Can rename whiteboard.
+7. Can delete whiteboard.
+8. Whiteboard route works inside app shell.
+9. Build passes.
+
+Run lint, typecheck, and build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Integrate whiteboard with planning hub"
+```
+
+---
+
+# Phase 18 — Phase 1 full audit
+
+Prompt:
+
+```text
+Read AGENTS.md and all /docs files.
+
+Perform a full Phase 1 audit.
+
+Check:
+1. Password gate works.
+2. Sidebar navigation works.
+3. Dashboard uses real data or clear empty states.
+4. Business Model Planner persists data.
+5. Niche Research Hub persists data.
+6. Offer Builder persists data.
+7. Financial Model persists data and calculations are correct.
+8. Weekly Planning persists data.
+9. Notes persist data.
+10. Decision Log persists data.
+11. Whiteboard still works and persists.
+12. No signup exists.
+13. No registration exists.
+14. No public account system exists.
+15. No tldraw is used.
+16. No fake persistence exists.
+17. No localStorage is used as main database.
+18. All forms validate inputs.
+19. Empty states exist.
+20. Delete actions ask for confirmation or are safe.
+21. Build passes.
+
+Run:
+pnpm lint
+pnpm typecheck
+pnpm build
+
+Fix all issues found.
+
+Do not add Phase 2 features yet.
+
+Update:
+/docs/ACCEPTANCE_TESTS.md
+/docs/DECISIONS.md
+/docs/CURRENT_STATE.md
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Audit and stabilize phase 1"
+```
+
+At this point you have the first usable private planning hub.
+
+---
+
+# Phase 19 — Phase 2 planning only
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Plan Phase 2 implementation only.
+
+Phase 2 modules:
+- Outreach Planner
+- Script Library
+- Sales Pipeline
+- Experiment Tracker
+- Funnel Planner
+
+Create /docs/PHASE_2_PLAN.md.
+
+For each module include:
+- Purpose
+- Database model
+- Routes
+- Components
+- API/server actions
+- Validation
+- Dashboard connections
+- Acceptance tests
+- Edge cases
+
+Do not implement Phase 2 yet.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Plan phase 2 sales modules"
+```
+
+---
+
+# Phase 20 — Outreach Planner
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_2_PLAN.md.
+
+Implement Phase 2 Slice 1: Outreach Planner.
+
+Route:
+- /outreach
+
+Database:
+Create OutreachCampaign model with fields:
+- id
+- name
+- targetNicheId optional
+- offerId optional
+- channel
+- status
+- leadSource
+- messageVersion
+- callToAction
+- dailyVolume
+- sentCount
+- replyCount
+- positiveReplyCount
+- bookedCallCount
+- closedWonCount
+- notes
+- createdAt
+- updatedAt
+
+Channels:
+- Cold Email
+- Cold Call
+- Instagram DM
+- Facebook DM
+- LinkedIn
+- Meta Ads
+- Referral
+- Other
+
+Statuses:
+- Draft
+- Active
+- Paused
+- Completed
+- Killed
+
+Features:
+- List campaigns
+- Create campaign
+- Edit campaign
+- Delete campaign
+- Calculate:
+  - reply rate
+  - positive reply rate
+  - booked call rate
+  - close rate
+- Link to niche and offer if available
+- Show active campaigns on dashboard
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create campaign.
+2. Can edit campaign.
+3. Rates calculate correctly.
+4. Active campaigns appear on dashboard.
+5. Refresh preserves data.
+6. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement outreach planner"
+```
+
+---
+
+# Phase 21 — Script Library
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_2_PLAN.md.
+
+Implement Phase 2 Slice 2: Script Library.
+
+Route:
+- /scripts
+
+Database:
+Create Script model with fields:
+- id
+- title
+- type
+- channel
+- targetNicheId optional
+- offerId optional
+- body
+- status
+- notes
+- createdAt
+- updatedAt
+
+Types:
+- Cold Email
+- Cold Call Opener
+- Voicemail
+- SMS
+- DM
+- Follow-up
+- Objection Response
+- Breakup Message
+- Sales Call
+- Cancellation Save
+
+Statuses:
+- Draft
+- Testing
+- Active
+- Retired
+
+Features:
+- List scripts
+- Create script
+- Edit script
+- Delete script
+- Filter by type/channel if simple
+- Link to niche and offer if available
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create script.
+2. Can edit script.
+3. Can delete script.
+4. Can link script to offer/niche.
+5. Refresh preserves data.
+6. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement script library"
+```
+
+---
+
+# Phase 22 — Sales Pipeline
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_2_PLAN.md.
+
+Implement Phase 2 Slice 3: Sales Pipeline.
+
+Route:
+- /pipeline
+
+Database:
+Create Prospect model with fields:
+- id
+- businessName
+- ownerName
+- nicheId optional
+- phone
+- email
+- website
+- googleRating
+- reviewCount
+- currentWebsiteQualityScore
+- painPoint
+- offerAngle
+- status
+- lastContactedAt
+- nextFollowUpAt
+- expectedMonthlyValue
+- closeProbability
+- notes
+- createdAt
+- updatedAt
+
+Pipeline statuses:
+- Lead
+- Contacted
+- Replied
+- Interested
+- Booked Call
+- No Show
+- Proposal Sent
+- Closed Won
+- Closed Lost
+- Follow Up Later
+
+Features:
+- List prospects
+- Create prospect
+- Edit prospect
+- Delete prospect
+- Kanban-style or table-style pipeline
+- Filter by status
+- Show expected pipeline value
+- Show follow-ups due
+- Dashboard should show active prospects and follow-ups due
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create prospect.
+2. Can move prospect between statuses.
+3. Can edit prospect.
+4. Active prospect count appears on dashboard.
+5. Follow-ups due appear on dashboard.
+6. Refresh preserves data.
+7. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement sales pipeline"
+```
+
+---
+
+# Phase 23 — Experiment Tracker
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_2_PLAN.md.
+
+Implement Phase 2 Slice 4: Experiment Tracker.
+
+Route:
+- /experiments
+
+Database:
+Create Experiment model with fields:
+- id
+- name
+- hypothesis
+- area
+- targetNicheId optional
+- offerId optional
+- outreachCampaignId optional
+- startDate
+- endDate
+- metricToImprove
+- baseline
+- result
+- decision
+- status
+- notes
+- createdAt
+- updatedAt
+
+Areas:
+- Niche
+- Offer
+- Outreach
+- Pricing
+- Landing Page
+- Fulfillment
+- Retention
+- Ads
+- Other
+
+Decisions:
+- Scale
+- Keep Testing
+- Kill
+- Modify
+
+Statuses:
+- Planned
+- Running
+- Completed
+- Archived
+
+Features:
+- List experiments
+- Create experiment
+- Edit experiment
+- Delete experiment
+- Mark decision
+- Show running experiments on dashboard
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create experiment.
+2. Can edit experiment.
+3. Can mark decision.
+4. Running experiments appear on dashboard.
+5. Refresh preserves data.
+6. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement experiment tracker"
+```
+
+---
+
+# Phase 24 — Funnel Planner
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_2_PLAN.md.
+
+Implement Phase 2 Slice 5: Funnel Planner.
+
+Route:
+- /funnels
+
+Database:
+Create Funnel model with fields:
+- id
+- name
+- targetNicheId optional
+- offerId optional
+- trafficSource
+- landingPageUrl
+- calendarUrl
+- followUpSequence
+- conversionRate
+- costPerBookedCall
+- closeRate
+- status
+- notes
+- createdAt
+- updatedAt
+
+Funnel stages should be stored as JSON or related records:
+- Lead Source
+- Outreach
+- Landing Page
+- Booking Page
+- Sales Call
+- Payment
+- Onboarding
+- Fulfillment
+- Launch
+- Retention
+- Upsell
+
+Features:
+- List funnels
+- Create funnel
+- Edit funnel
+- Delete funnel
+- Link to niche and offer
+- Display stages clearly
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create funnel.
+2. Can edit funnel stages.
+3. Can link to niche and offer.
+4. Refresh preserves data.
+5. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement funnel planner"
+```
+
+---
+
+# Phase 25 — Phase 2 audit
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Perform full Phase 2 audit.
+
+Check:
+1. Outreach Planner works and persists.
+2. Script Library works and persists.
+3. Sales Pipeline works and persists.
+4. Experiment Tracker works and persists.
+5. Funnel Planner works and persists.
+6. Dashboard correctly reflects active campaigns, prospects, follow-ups, and experiments.
+7. No fake metrics.
+8. No signup or SaaS logic.
+9. No broken sidebar links.
+10. Build passes.
+
+Run:
+pnpm lint
+pnpm typecheck
+pnpm build
+
+Fix all errors.
+
+Update:
+- /docs/CURRENT_STATE.md
+- /docs/ACCEPTANCE_TESTS.md
+- /docs/DECISIONS.md
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Audit and stabilize phase 2"
+```
+
+---
+
+# Phase 26 — Phase 3 planning only
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Plan Phase 3 implementation only.
+
+Phase 3 modules:
+- Client Tracker
+- Fulfillment Tracker
+- SOP Library
+- VA Task System
+- Automation Map
+- Website Template Library
+- Review System Planner
+- Churn & Retention Planner
+
+Create /docs/PHASE_3_PLAN.md.
+
+For each module include:
+- Purpose
+- Database model
+- Routes
+- Components
+- Validation
+- Dashboard connections
+- Acceptance tests
+- Edge cases
+
+Do not implement Phase 3 yet.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Plan phase 3 fulfillment modules"
+```
+
+---
+
+# Phase 27 — Client Tracker
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_3_PLAN.md.
+
+Implement Phase 3 Slice 1: Client Tracker.
+
+Route:
+- /clients
+
+Database:
+Create Client model with fields:
+- id
+- businessName
+- ownerName
+- nicheId optional
+- packageName
+- monthlyPrice
+- setupFee
+- status
+- startDate
+- renewalDate
+- websiteUrl
+- ghlSubaccountUrl
+- googleBusinessProfileUrl
+- accessNotes
+- churnRisk
+- notes
+- createdAt
+- updatedAt
+
+Statuses:
+- Onboarding
+- Active
+- At Risk
+- Paused
+- Cancelled
+
+Features:
+- List clients
+- Create client
+- Edit client
+- Delete/archive client
+- Show MRR from active clients
+- Show churn-risk clients
+- Dashboard should use real active client count and MRR
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create client.
+2. Can edit client.
+3. Active clients affect dashboard MRR.
+4. Churn-risk clients appear on dashboard.
+5. Refresh preserves data.
+6. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement client tracker"
+```
+
+---
+
+# Phase 28 — Fulfillment Tracker
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_3_PLAN.md.
+
+Implement Phase 3 Slice 2: Fulfillment Tracker.
+
+Route:
+- /fulfillment
+
+Database:
+Create FulfillmentTask model with fields:
+- id
+- clientId relation
+- title
+- description
+- stage
+- status
+- assignedTo
+- priority
+- dueDate
+- checklist
+- qaStatus
+- notes
+- createdAt
+- updatedAt
+
+Stages:
+- Payment Received
+- Onboarding Form Submitted
+- Access Collected
+- Website Started
+- Website Completed
+- Review Automation Installed
+- Missed-Call Text-Back Installed
+- Database Reactivation Installed
+- Quality Check
+- Client Approval
+- Launched
+
+Statuses:
+- Backlog
+- Assigned
+- In Progress
+- Waiting for Access
+- Waiting for Client
+- Ready for QA
+- Changes Needed
+- Complete
+
+Features:
+- List fulfillment tasks
+- Create task
+- Edit task
+- Delete task
+- Filter by client/status
+- Show overdue tasks
+- Dashboard should show fulfillment backlog and overdue tasks
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create task for client.
+2. Can update status.
+3. Overdue tasks appear on dashboard.
+4. Refresh preserves data.
+5. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement fulfillment tracker"
+```
+
+---
+
+# Phase 29 — SOP Library
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_3_PLAN.md.
+
+Implement Phase 3 Slice 3: SOP Library.
+
+Route:
+- /sops
+
+Database:
+Create SOP model with fields:
+- id
+- title
+- category
+- purpose
+- steps
+- requiredTools
+- inputs
+- outputs
+- owner
+- estimatedMinutes
+- checklist
+- loomUrl
+- status
+- createdAt
+- updatedAt
+
+Categories:
+- Sales
+- Lead Scraping
+- Cold Outreach
+- Client Onboarding
+- Website Setup
+- GoHighLevel Setup
+- Review Automation
+- Missed-Call Text-Back
+- Database Reactivation
+- Quality Assurance
+- VA Training
+- Cancellation Handling
+- Upsells
+
+Statuses:
+- Draft
+- Active
+- Needs Update
+- Retired
+
+Features:
+- List SOPs
+- Create SOP
+- Edit SOP
+- Delete SOP
+- Filter by category/status
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create SOP.
+2. Can edit SOP.
+3. Can filter SOPs.
+4. Refresh preserves data.
+5. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement SOP library"
+```
+
+---
+
+# Phase 30 — VA Task System
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_3_PLAN.md.
+
+Implement Phase 3 Slice 4: VA Task System.
+
+Route:
+- /va-tasks
+
+Important:
+This is still private-only.
+Do not create VA accounts.
+Do not create public user access.
+
+Database:
+Create VATask model with fields:
+- id
+- title
+- description
+- clientId optional
+- assignedVAName
+- priority
+- status
+- dueDate
+- checklist
+- files
+- notes
+- qaStatus
+- createdAt
+- updatedAt
+
+Statuses:
+- Backlog
+- Assigned
+- In Progress
+- Waiting for Access
+- Waiting for Client
+- Ready for QA
+- Changes Needed
+- Complete
+
+Features:
+- List VA tasks
+- Create VA task
+- Edit VA task
+- Delete VA task
+- Filter by VA/status/client
+- Show overdue VA tasks
+- Persist in PostgreSQL
+- Validate with Zod
+
+Acceptance tests:
+1. Can create VA task.
+2. Can assign by name.
+3. Can update status.
+4. Overdue tasks appear.
+5. No VA login/account system exists.
+6. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement VA task system"
+```
+
+---
+
+# Phase 31 — Automation Map
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_3_PLAN.md.
+
+Implement Phase 3 Slice 5: Automation Map.
+
+Route:
+- /automations
+
+Database:
+Create AutomationTemplate model with fields:
+- id
+- name
+- purpose
+- trigger
+- action
+- packageLevel
+- ghlWorkflowName
+- requiredInputs
+- setupSteps
+- testingSteps
+- failureCases
+- status
+- notes
+- createdAt
+- updatedAt
+
+Core automation examples:
+- Missed-call text-back
+- Google review request
+- New lead notification
+- Form submission follow-up
+- Database reactivation
+- No-response follow-up
+- Appointment reminder
+- Payment failed reminder
+- Monthly report reminder
+
+Features:
+- List automations
+- Create automation
+- Edit automation
+- Delete automation
+- Filter by package/status
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create automation template.
+2. Can edit setup/testing steps.
+3. Refresh preserves data.
+4. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement automation map"
+```
+
+---
+
+# Phase 32 — Website Template Library
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_3_PLAN.md.
+
+Implement Phase 3 Slice 6: Website Template Library.
+
+Route:
+- /website-templates
+
+Database:
+Create WebsiteTemplate model with fields:
+- id
+- name
+- nicheId optional
+- pagesIncluded
+- heroHeadline
+- sections
+- cta
+- seoKeywords
+- exampleUrl
+- status
+- conversionNotes
+- createdAt
+- updatedAt
+
+Reusable sections may include:
+- Hero
+- Trust Section
+- Reviews
+- Service Cards
+- Before/After
+- FAQ
+- CTA
+- Footer
+- Lead Form
+
+Features:
+- List templates
+- Create template
+- Edit template
+- Delete template
+- Link to niche if available
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create template.
+2. Can link to niche.
+3. Can edit sections.
+4. Refresh preserves data.
+5. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement website template library"
+```
+
+---
+
+# Phase 33 — Review System Planner
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_3_PLAN.md.
+
+Implement Phase 3 Slice 7: Review System Planner.
+
+Route:
+- /reviews
+
+Database:
+Create ReviewTracker model with fields:
+- id
+- clientId relation
+- currentGoogleRating
+- currentReviewCount
+- targetReviewCount
+- reviewRequestAutomationStatus
+- reviewRequestMessage
+- reviewLink
+- newReviewsThisMonth
+- negativeReviews
+- responseNeeded
+- notes
+- createdAt
+- updatedAt
+
+Features:
+- List review trackers by client
+- Create tracker for client
+- Edit tracker
+- Identify clients with no review growth
+- Identify clients under 4.5 stars
+- Identify clients below target review count
+- Show review issues on dashboard
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create review tracker.
+2. Can update review count/rating.
+3. Review risk clients appear.
+4. Refresh preserves data.
+5. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement review system planner"
+```
+
+---
+
+# Phase 34 — Churn & Retention Planner
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_3_PLAN.md.
+
+Implement Phase 3 Slice 8: Churn & Retention Planner.
+
+Route:
+- /retention
+
+Database:
+Create RetentionPlaybook model with fields:
+- id
+- name
+- trigger
+- timing
+- message
+- actionSteps
+- status
+- notes
+- createdAt
+- updatedAt
+
+Create ChurnRiskNote or use Client churnRisk fields if simpler.
+
+Features:
+- List retention playbooks
+- Create/edit/delete playbooks
+- Show at-risk clients
+- Add churn-risk notes to clients if useful
+- Retention playbook types:
+  - First 7 days launch confirmation
+  - Day 14 value reminder
+  - Day 30 report
+  - Monthly report
+  - Quarterly review
+  - Cancellation save script
+  - Winback campaign
+- Dashboard should show churn-risk clients
+- Validate with Zod
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can create retention playbook.
+2. Can mark client as at risk.
+3. At-risk clients appear on dashboard.
+4. Refresh preserves data.
+5. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement churn and retention planner"
+```
+
+---
+
+# Phase 35 — Phase 3 audit
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Perform full Phase 3 audit.
+
+Check:
+1. Client Tracker works.
+2. Fulfillment Tracker works.
+3. SOP Library works.
+4. VA Task System works.
+5. Automation Map works.
+6. Website Template Library works.
+7. Review System Planner works.
+8. Churn & Retention Planner works.
+9. Dashboard now uses real client/MRR/task/churn data.
+10. No fake data.
+11. No public accounts.
+12. No broken routes.
+13. Existing whiteboard still works.
+14. Build passes.
+
+Run:
+pnpm lint
+pnpm typecheck
+pnpm build
+
+Fix all errors.
+
+Update:
+- /docs/CURRENT_STATE.md
+- /docs/ACCEPTANCE_TESTS.md
+- /docs/DECISIONS.md
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Audit and stabilize phase 3"
+```
+
+---
+
+# Phase 36 — Phase 4 planning only
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Plan Phase 4 implementation only.
+
+Phase 4 modules:
+- CSV Import/Data Room
+- Metrics Dashboard
+- Reports
+- Future CRM integration placeholders
+
+Create /docs/PHASE_4_PLAN.md.
+
+Important:
+Do not integrate GoHighLevel yet.
+Do not integrate Stripe yet.
+Do not integrate Meta Ads yet.
+
+For now, only build:
+- CSV upload
+- Column mapping
+- Import history
+- Basic internal data mapping
+- Metrics dashboard from internal database
+- Simple report generation from existing records
+- Integration placeholder records for future use
+
+Do not implement Phase 4 yet.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Plan phase 4 data modules"
+```
+
+---
+
+# Phase 37 — CSV Import/Data Room
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_4_PLAN.md.
+
+Implement Phase 4 Slice 1: CSV Import/Data Room.
+
+Route:
+- /imports
+
+Purpose:
+Allow uploading CSV files and mapping them into internal data types later.
+
+Do not connect external CRM yet.
+
+Database:
+Create ImportBatch model:
+- id
+- name
+- sourceType
+- targetType
+- fileName
+- rowCount
+- status
+- columnMapping
+- errorSummary
+- createdAt
+- updatedAt
+
+Create ImportedRecord model:
+- id
+- importBatchId
+- rawData
+- mappedData
+- status
+- error
+- createdAt
+- updatedAt
+
+Source types:
+- CSV Upload
+- GoHighLevel Export
+- Stripe Export
+- Meta Ads Export
+- Google Sheets Export
+- Manual
+
+Target types:
+- Leads
+- Prospects
+- Clients
+- Payments
+- Campaigns
+- Calls
+- Appointments
+- Tasks
+- Reviews
+
+Features:
+- Upload CSV
+- Preview rows
+- Save import batch
+- Store raw rows
+- Basic column mapping UI
+- Do not automatically overwrite existing records yet unless clearly implemented safely
+- Show import history
+- Validate inputs
+- Persist in PostgreSQL
+
+Acceptance tests:
+1. Can upload CSV.
+2. Can preview rows.
+3. Can save import batch.
+4. Import history appears.
+5. Raw records are stored.
+6. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement CSV import data room"
+```
+
+---
+
+# Phase 38 — Metrics Dashboard
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_4_PLAN.md.
+
+Implement Phase 4 Slice 2: Metrics Dashboard.
+
+Route:
+- /metrics
+
+Purpose:
+Show performance metrics from internal records.
+
+Metrics:
+- MRR
+- Active clients
+- Churn-risk clients
+- New clients this month
+- Cancelled clients this month
+- Average revenue per client
+- Active prospects
+- Booked calls
+- Close rate if data exists
+- Outreach reply rates if data exists
+- Fulfillment backlog
+- Overdue tasks
+- Running experiments
+
+Rules:
+- Use real internal data only.
+- Do not fake numbers.
+- If data is missing, show empty state or “Not enough data.”
+
+Features:
+- Summary cards
+- Simple time period filters if easy
+- Basic charts only if stable
+- Metrics calculation utilities in separate files
+
+Acceptance tests:
+1. Metrics page loads.
+2. Uses real data.
+3. Empty states appear when data missing.
+4. Dashboard and metrics are consistent.
+5. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement metrics dashboard"
+```
+
+---
+
+# Phase 39 — Reports
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_4_PLAN.md.
+
+Implement Phase 4 Slice 3: Reports.
+
+Route:
+- /reports
+
+Purpose:
+Generate simple internal reports from existing business records.
+
+Reports:
+- Weekly Business Review
+- Sales Pipeline Summary
+- Fulfillment Backlog Summary
+- Client Retention Summary
+- Financial Snapshot
+- Niche/Offer Testing Summary
+
+Features:
+- Select report type
+- Generate report from current database records
+- Show report in readable format
+- Save generated report if simple
+- Export/copy markdown if simple
+
+Do not use AI yet.
+Do not connect external APIs yet.
+
+Acceptance tests:
+1. Can generate weekly business review.
+2. Report uses real database records.
+3. Missing data is handled clearly.
+4. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Implement internal reports"
+```
+
+---
+
+# Phase 40 — Future integration placeholders
+
+Prompt:
+
+```text
+Read AGENTS.md and /docs/PHASE_4_PLAN.md.
+
+Implement Phase 4 Slice 4: Future Integration Placeholders.
+
+Route:
+- /integrations
+
+Purpose:
+Prepare for future CRM/data integrations without connecting them yet.
+
+Database:
+Create IntegrationConnection model:
+- id
+- provider
+- status
+- displayName
+- notes
+- lastSyncAt
+- createdAt
+- updatedAt
+
+Providers:
+- GoHighLevel
+- Stripe
+- Meta Ads
+- Google Sheets
+- Gmail
+- Google Business Profile
+
+Features:
+- Show integration cards
+- Mark as Planned / Not Connected
+- Add notes
+- No real OAuth yet
+- No API keys stored yet
+- No external calls yet
+
+Acceptance tests:
+1. Integrations page loads.
+2. Providers are listed.
+3. Notes/status can be saved if implemented.
+4. No real external API calls happen.
+5. Build passes.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Add future integration placeholders"
+```
+
+---
+
+# Phase 41 — Full app audit
+
+Prompt:
+
+```text
+Read AGENTS.md and all docs.
+
+Perform a full 0-to-current app audit.
+
+Check every route:
+- /dashboard
+- /business-model
+- /niches
+- /offers
+- /financial-model
+- /weekly-planning
+- /notes
+- /decisions
+- /whiteboards
+- /outreach
+- /scripts
+- /pipeline
+- /experiments
+- /funnels
+- /clients
+- /fulfillment
+- /sops
+- /va-tasks
+- /automations
+- /website-templates
+- /reviews
+- /retention
+- /imports
+- /metrics
+- /reports
+- /integrations
+
+Check:
+1. Protected access works.
+2. Sidebar links work.
+3. CRUD pages persist data.
+4. Forms validate.
+5. Delete actions are safe.
+6. Dashboard uses real data.
+7. Metrics use real data.
+8. Whiteboard still works.
+9. No signup exists.
+10. No registration exists.
+11. No public account system exists.
+12. No tldraw exists.
+13. No fake persistence exists.
+14. No console errors if detectable.
+15. No TypeScript errors.
+16. No build errors.
+
+Run:
+pnpm lint
+pnpm typecheck
+pnpm build
+
+Fix everything found.
+
+Update:
+/docs/CURRENT_STATE.md
+/docs/ACCEPTANCE_TESTS.md
+/docs/DECISIONS.md
+/docs/README_INTERNAL.md
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Full app audit and stabilization"
+```
+
+---
+
+# Phase 42 — UI polish pass
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Perform a UI/UX polish pass only.
+
+Do not add new business features.
+
+Improve:
+- Sidebar consistency
+- Page headers
+- Empty states
+- Form spacing
+- Table readability
+- Dashboard card layout
+- Button consistency
+- Error states
+- Loading states
+- Mobile basic usability
+- Dark mode consistency
+
+Do not break existing routes.
+Do not redesign the entire app.
+Do not add animations unless simple and stable.
+
+Run lint, typecheck, build. Fix errors.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Polish UI and empty states"
+```
+
+---
+
+# Phase 43 — Docker and production hardening
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Audit and harden Docker/self-hosting setup.
+
+Scope:
+- Dockerfile
+- docker-compose.yml
+- .env.example
+- README setup instructions
+- Prisma migration flow
+- Production build command
+- Database persistence volume
+- Health checks if simple
+
+Requirements:
+- App should run locally with pnpm.
+- App should run with docker compose.
+- PostgreSQL data should persist.
+- Environment variables should be documented.
+- PLANNING_HUB_PASSWORD must be documented.
+- No secrets should be committed.
+
+Commands to verify if possible:
+pnpm lint
+pnpm typecheck
+pnpm build
+docker compose config
+
+Do not add external integrations.
+Do not change product features unless required for deployment.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Harden Docker and self-hosting setup"
+```
+
+---
+
+# Phase 44 — README
+
+Prompt:
+
+```text
+Read AGENTS.md and docs.
+
+Create or update README.md.
+
+README must include:
+- What SiteSledge Command Center is
+- Private-only warning
+- Tech stack
+- Feature list by module
+- Local setup
+- Docker setup
+- Environment variables
+- Database migration instructions
+- How to unlock the app
+- How to use the dashboard
+- How to use planning modules
+- How to use whiteboards
+- How to backup data
+- Known limitations
+- Future integration plan
+
+Also create /docs/OPERATOR_MANUAL.md explaining how I should use the app weekly to run my business.
+
+Do not change application behavior.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Add README and operator manual"
+```
+
+---
+
+# Phase 45 — Final acceptance test checklist
+
+Give OpenCode this:
+
+```text
+Read AGENTS.md and docs.
+
+Create /docs/FINAL_ACCEPTANCE_CHECKLIST.md.
+
+Include a manual test checklist for the entire app.
+
+The checklist must cover:
+1. Unlock/password gate
+2. Dashboard
+3. Business Model Planner
+4. Niche Research Hub
+5. Offer Builder
+6. Financial Model
+7. Weekly Planning
+8. Notes
+9. Decision Log
+10. Whiteboards
+11. Outreach Planner
+12. Script Library
+13. Sales Pipeline
+14. Experiments
+15. Funnels
+16. Clients
+17. Fulfillment
+18. SOPs
+19. VA Tasks
+20. Automations
+21. Website Templates
+22. Reviews
+23. Retention
+24. Imports
+25. Metrics
+26. Reports
+27. Integrations
+28. Docker
+29. Data persistence
+30. No public signup/account system
+
+Then run:
+pnpm lint
+pnpm typecheck
+pnpm build
+
+Fix any errors.
+
+Do not add new features.
+```
+
+Commit:
+
+```bash
+git add .
+git commit -m "Add final acceptance checklist"
+```
+
+---
+
+# Final 100% build order summary
+
+Use this exact order:
+
+```text
+0. Git checkpoint current working whiteboard
+1. AGENTS.md
+2. CURRENT_STATE.md
+3. Full docs
+4. Critical plan review
+5. Check scripts
+6. Password gate
+7. App shell/sidebar
+8. Dashboard
+9. Shared CRUD foundation
+10. Business Model Planner
+11. Niche Research Hub
+12. Offer Builder
+13. Financial Model
+14. Weekly Planning
+15. Notes
+16. Decision Log
+17. Whiteboard cleanup
+18. Phase 1 audit
+19. Phase 2 plan
+20. Outreach Planner
+21. Script Library
+22. Sales Pipeline
+23. Experiment Tracker
+24. Funnel Planner
+25. Phase 2 audit
+26. Phase 3 plan
+27. Client Tracker
+28. Fulfillment Tracker
+29. SOP Library
+30. VA Task System
+31. Automation Map
+32. Website Template Library
+33. Review System Planner
+34. Churn & Retention Planner
+35. Phase 3 audit
+36. Phase 4 plan
+37. CSV Import/Data Room
+38. Metrics Dashboard
+39. Reports
+40. Integration placeholders
+41. Full app audit
+42. UI polish
+43. Docker hardening
+44. README/operator manual
+45. Final acceptance checklist
+```
+
+---
+
+# Most important instruction to repeat to OpenCode
+
+Add this at the end of almost every prompt:
+
+```text
+Do not expand scope.
+Do not add signup.
+Do not add SaaS logic.
+Do not break the existing whiteboard.
+Run lint, typecheck, and build.
+Fix errors properly.
+```
+
+That is what keeps the project from turning into an unfinished mess.

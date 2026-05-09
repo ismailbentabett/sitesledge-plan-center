@@ -7,30 +7,125 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            String   @id @default(cuid())
-  name          String
-  email         String   @unique
-  passwordHash  String
-  boards        Board[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  @@map("users")
-}
-
 model Board {
   id         String   @id @default(cuid())
   title      String   @default("Untitled Board")
-  ownerId    String
-  owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   stateJson  String   @default("{}")
   isPublic   Boolean  @default(false)
   publicId   String   @unique @default(cuid())
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  @@index([ownerId])
   @@index([publicId])
   @@map("boards")
+}
+
+model Client {
+  id            String   @id @default(cuid())
+  businessName  String
+  contactName   String
+  email         String
+  phone         String
+  businessType  String
+  status        ClientStatus @default(prospect)
+  monthlyPrice  Int
+  startDate     DateTime?
+  churnDate     DateTime?
+  notes         String   @default("")
+  pillars       Pillar[]
+  vaTasks       VATask[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status])
+  @@map("clients")
+}
+
+model Pillar {
+  id          String      @id @default(cuid())
+  clientId    String
+  client      Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  type        PillarType
+  status      PillarStatus @default(not_started)
+  notes       String      @default("")
+  setupDate   DateTime?
+  lastReview  DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([clientId, type])
+  @@index([clientId])
+  @@map("pillars")
+}
+
+model FinancialRecord {
+  id              String   @id @default(cuid())
+  year            Int
+  month           Int
+  mrr             Int
+  newClients      Int      @default(0)
+  churnedClients  Int      @default(0)
+  churnedMrr      Int      @default(0)
+  targetMrr       Int?
+  notes           String   @default("")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([year, month])
+  @@index([year, month])
+  @@map("financial_records")
+}
+
+model VATask {
+  id          String     @id @default(cuid())
+  title       String
+  description String     @default("")
+  assignedTo  String     @default("")
+  status      TaskStatus @default(todo)
+  priority    TaskPriority @default(medium)
+  dueDate     DateTime?
+  clientId    String?
+  client      Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([status])
+  @@index([clientId])
+  @@index([priority])
+  @@map("va_tasks")
+}
+
+enum ClientStatus {
+  prospect
+  active
+  churned
+  paused
+}
+
+enum PillarType {
+  seo_website
+  google_reviews
+  missed_call_textback
+  database_reactivation
+}
+
+enum PillarStatus {
+  not_started
+  in_progress
+  active
+  paused
+}
+
+enum TaskStatus {
+  todo
+  in_progress
+  done
+  archived
+}
+
+enum TaskPriority {
+  low
+  medium
+  high
+  urgent
 }
