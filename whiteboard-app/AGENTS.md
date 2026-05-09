@@ -34,6 +34,14 @@ Not a SaaS product. Not multi-tenant. Not public-facing.
 - No public account creation.
 - No user management UI.
 
+## Architecture Decisions
+- `ADMIN_PASSWORD` is used (not `PLANNING_HUB_PASSWORD`) — the app was already built with this naming.
+- Custom cookie-based auth is used (not next-auth sessions). next-auth is removed.
+- Existing API routes (clients, pillars, financials, va-tasks) are kept and adapted — not rewritten.
+- Existing Prisma models (Client, Pillar, FinancialRecord, VATask) are extended, not replaced.
+- The `/dashboard` route will be transformed from a whiteboard list into the Command Dashboard.
+- Whiteboards will move to `/whiteboards` route with a new list page.
+
 ## Tech Stack
 - Next.js App Router
 - TypeScript
