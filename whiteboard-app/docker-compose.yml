@@ -22,8 +22,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/whiteboard?schema=public
-      NEXTAUTH_SECRET: your-secret-key-change-in-production
-      NEXTAUTH_URL: http://localhost:3000
+      ADMIN_PASSWORD: your-admin-password-change-in-production
     ports:
       - "3000:3000"
 
