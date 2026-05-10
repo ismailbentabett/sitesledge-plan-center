@@ -195,3 +195,84 @@ export const decisionSchema = z.object({
   outcome: z.string().max(1000).optional(),
   status: z.enum(['open', 'decided', 'reviewing', 'validated', 'reversed']).optional(),
 })
+
+export const outreachCampaignSchema = z.object({
+  name: z.string().min(1).max(200),
+  targetNicheId: z.string().cuid().optional().nullable(),
+  offerId: z.string().cuid().optional().nullable(),
+  channel: z.string().max(100).optional(),
+  status: z.enum(['draft', 'active', 'paused', 'completed']).optional(),
+  leadSource: z.string().max(200).optional(),
+  messageVersion: z.string().max(200).optional(),
+  callToAction: z.string().max(500).optional(),
+  dailyVolume: z.number().int().min(0).max(10000).optional(),
+  sentCount: z.number().int().min(0).optional(),
+  replyCount: z.number().int().min(0).optional(),
+  positiveReplyCount: z.number().int().min(0).optional(),
+  bookedCallCount: z.number().int().min(0).optional(),
+  closedWonCount: z.number().int().min(0).optional(),
+  notes: z.string().max(2000).optional(),
+})
+
+export const scriptSchema = z.object({
+  title: z.string().min(1).max(200),
+  type: z.enum(['cold_email', 'cold_call', 'voicemail', 'follow_up', 'linkedin_message', 'sms']).optional(),
+  channel: z.enum(['email', 'phone', 'linkedin', 'sms', 'in_person']).optional(),
+  targetNicheId: z.string().cuid().optional().nullable(),
+  offerId: z.string().cuid().optional().nullable(),
+  body: z.string().max(5000).optional(),
+  status: z.enum(['draft', 'active', 'archived']).optional(),
+  notes: z.string().max(2000).optional(),
+})
+
+export const prospectSchema = z.object({
+  businessName: z.string().min(1).max(200),
+  ownerName: z.string().max(200).optional(),
+  nicheId: z.string().cuid().optional().nullable(),
+  phone: z.string().max(50).optional(),
+  email: z.string().email().or(z.literal('')).optional(),
+  website: z.string().max(500).optional(),
+  googleRating: z.number().min(0).max(5).optional().nullable(),
+  reviewCount: z.number().int().min(0).optional().nullable(),
+  currentWebsiteQualityScore: z.number().int().min(0).max(10).optional(),
+  painPoint: z.string().max(1000).optional(),
+  offerAngle: z.string().max(500).optional(),
+  status: z.enum(['new', 'contacted', 'interested', 'proposal_sent', 'won', 'lost']).optional(),
+  lastContactedAt: z.string().datetime().optional().nullable(),
+  nextFollowUpAt: z.string().datetime().optional().nullable(),
+  expectedMonthlyValue: z.number().int().min(0).optional(),
+  closeProbability: z.number().min(0).max(1).optional(),
+  notes: z.string().max(2000).optional(),
+})
+
+export const experimentSchema = z.object({
+  name: z.string().min(1).max(200),
+  hypothesis: z.string().max(2000).optional(),
+  area: z.enum(['outreach', 'offer', 'pricing', 'channel', 'funnel', 'ad_creative']).optional(),
+  targetNicheId: z.string().cuid().optional().nullable(),
+  offerId: z.string().cuid().optional().nullable(),
+  outreachCampaignId: z.string().cuid().optional().nullable(),
+  startDate: z.string().datetime().optional().nullable(),
+  endDate: z.string().datetime().optional().nullable(),
+  metricToImprove: z.string().max(200).optional(),
+  baseline: z.string().max(1000).optional(),
+  result: z.string().max(2000).optional(),
+  decision: z.enum(['scale', 'keep', 'kill', 'inconclusive']).optional(),
+  status: z.enum(['planned', 'running', 'completed', 'archived']).optional(),
+  notes: z.string().max(2000).optional(),
+})
+
+export const funnelSchema = z.object({
+  name: z.string().min(1).max(200),
+  targetNicheId: z.string().cuid().optional().nullable(),
+  offerId: z.string().cuid().optional().nullable(),
+  trafficSource: z.string().max(200).optional(),
+  landingPageUrl: z.string().max(500).optional(),
+  calendarUrl: z.string().max(500).optional(),
+  followUpSequence: z.string().max(5000).optional(),
+  conversionRate: z.number().min(0).max(1).optional(),
+  costPerBookedCall: z.number().int().min(0).optional(),
+  closeRate: z.number().min(0).max(1).optional(),
+  status: z.enum(['draft', 'testing', 'active', 'paused', 'retired']).optional(),
+  notes: z.string().max(2000).optional(),
+})

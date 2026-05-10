@@ -42,11 +42,11 @@ const navSections: NavSection[] = [
   {
     label: 'Sales',
     items: [
-      { href: '/outreach', label: 'Outreach', icon: 'outreach', disabled: true },
-      { href: '/scripts', label: 'Scripts', icon: 'scripts', disabled: true },
-      { href: '/pipeline', label: 'Pipeline', icon: 'pipeline', disabled: true },
-      { href: '/experiments', label: 'Experiments', icon: 'experiments', disabled: true },
-      { href: '/funnels', label: 'Funnels', icon: 'funnels', disabled: true },
+      { href: '/outreach', label: 'Outreach', icon: 'outreach' },
+      { href: '/scripts', label: 'Scripts', icon: 'scripts' },
+      { href: '/pipeline', label: 'Pipeline', icon: 'pipeline' },
+      { href: '/experiments', label: 'Experiments', icon: 'experiments' },
+      { href: '/funnels', label: 'Funnels', icon: 'funnels' },
     ],
   },
   {

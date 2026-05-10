@@ -115,7 +115,7 @@ Plan → Implement slice → Test → Fix → Commit → Next slice
 | 24 | Funnel Planner | `/funnels` | `Funnel` | Funnel stages as JSON, niche/offer linking |
 | 25 | Phase 2 audit | Audit | — | Full checklist, fix all issues |
 
-**Status**: Not started.
+**Status**: Complete.
 
 **Commits**:
 ```
@@ -368,11 +368,11 @@ SiteSledge Command Center
 |-----------|--------|--------|------------|
 | 1 — Foundation | 0–5 | In Progress | ~20% |
 | 2 — Core Planning Hub | 6–18 | Not Started | 0% |
-| 3 — Sales & Growth | 19–25 | Not Started | 0% |
+| 3 — Sales & Growth | 19–25 | Complete | 100% |
 | 4 — Fulfillment & Ops | 26–35 | Not Started | 0% |
 | 5 — Data & Metrics | 36–40 | Not Started | 0% |
 | 6 — Polish & Ship | 41–45 | Not Started | 0% |
-| **Total** | **0–45** | | **~3%** |
+| **Total** | **0–45** | | **~20%** |
 
 ---
 

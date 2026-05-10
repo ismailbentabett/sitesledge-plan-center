@@ -256,6 +256,190 @@ model Decision {
   @@map("decisions")
 }
 
+model OutreachCampaign {
+  id                  String                 @id @default(cuid())
+  name                String
+  targetNicheId       String?
+  offerId             String?
+  channel             String                 @default("")
+  status              OutreachStatus         @default(draft)
+  leadSource          String                 @default("")
+  messageVersion      String                 @default("")
+  callToAction        String                 @default("")
+  dailyVolume         Int                    @default(0)
+  sentCount           Int                    @default(0)
+  replyCount          Int                    @default(0)
+  positiveReplyCount  Int                    @default(0)
+  bookedCallCount     Int                    @default(0)
+  closedWonCount      Int                    @default(0)
+  notes               String                 @default("")
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  @@index([status])
+  @@map("outreach_campaigns")
+}
+
+model Script {
+  id            String       @id @default(cuid())
+  title         String
+  type          ScriptType   @default(cold_email)
+  channel       ScriptChannel @default(email)
+  targetNicheId String?
+  offerId       String?
+  body          String       @default("")
+  status        ScriptStatus @default(draft)
+  notes         String       @default("")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([type])
+  @@index([channel])
+  @@index([status])
+  @@map("scripts")
+}
+
+model Prospect {
+  id                        String           @id @default(cuid())
+  businessName              String
+  ownerName                 String           @default("")
+  nicheId                   String?
+  phone                     String           @default("")
+  email                     String           @default("")
+  website                   String           @default("")
+  googleRating              Float?
+  reviewCount               Int?
+  currentWebsiteQualityScore Int             @default(0)
+  painPoint                 String           @default("")
+  offerAngle                String           @default("")
+  status                    ProspectStatus   @default(new)
+  lastContactedAt           DateTime?
+  nextFollowUpAt            DateTime?
+  expectedMonthlyValue      Int              @default(0)
+  closeProbability          Float            @default(0)
+  notes                     String           @default("")
+  createdAt                 DateTime         @default(now())
+  updatedAt                 DateTime         @updatedAt
+
+  @@index([status])
+  @@map("prospects")
+}
+
+model Experiment {
+  id                  String             @id @default(cuid())
+  name                String
+  hypothesis          String             @default("")
+  area                ExperimentArea     @default(outreach)
+  targetNicheId       String?
+  offerId             String?
+  outreachCampaignId  String?
+  startDate           DateTime?
+  endDate             DateTime?
+  metricToImprove     String             @default("")
+  baseline            String             @default("")
+  result              String             @default("")
+  decision            ExperimentDecision @default(inconclusive)
+  status              ExperimentStatus   @default(planned)
+  notes               String             @default("")
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@index([area])
+  @@index([status])
+  @@map("experiments")
+}
+
+model Funnel {
+  id                   String         @id @default(cuid())
+  name                 String
+  targetNicheId        String?
+  offerId              String?
+  trafficSource        String         @default("")
+  landingPageUrl       String         @default("")
+  calendarUrl          String         @default("")
+  followUpSequence     String         @default("[]")
+  conversionRate       Float          @default(0)
+  costPerBookedCall    Int            @default(0)
+  closeRate            Float          @default(0)
+  status               FunnelStatus   @default(draft)
+  notes                String         @default("")
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  @@index([status])
+  @@map("funnels")
+}
+
+enum OutreachStatus {
+  draft
+  active
+  paused
+  completed
+}
+
+enum ScriptType {
+  cold_email
+  cold_call
+  voicemail
+  follow_up
+  linkedin_message
+  sms
+}
+
+enum ScriptChannel {
+  email
+  phone
+  linkedin
+  sms
+  in_person
+}
+
+enum ScriptStatus {
+  draft
+  active
+  archived
+}
+
+enum ProspectStatus {
+  new
+  contacted
+  interested
+  proposal_sent
+  won
+  lost
+}
+
+enum ExperimentArea {
+  outreach
+  offer
+  pricing
+  channel
+  funnel
+  ad_creative
+}
+
+enum ExperimentDecision {
+  scale
+  keep
+  kill
+  inconclusive
+}
+
+enum ExperimentStatus {
+  planned
+  running
+  completed
+  archived
+}
+
+enum FunnelStatus {
+  draft
+  testing
+  active
+  paused
+  retired
+}
+
 enum ClientStatus {
   prospect
   active

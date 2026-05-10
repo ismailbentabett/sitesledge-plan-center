@@ -31,7 +31,7 @@
 | 17 | Whiteboard cleanup | `/whiteboards` | Board (extend) |
 | 18 | Phase 1 audit | — | — |
 
-## Milestone 3: Sales & Growth
+## Milestone 3: Sales & Growth (Complete)
 **Phases 19–25** — Outreach, scripts, pipeline, experiments, funnels
 
 | Phase | Name | Route | New Models |
