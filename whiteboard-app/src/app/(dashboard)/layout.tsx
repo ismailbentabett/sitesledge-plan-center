@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { isAuthenticated } from '@/lib/auth'
+import { headers } from 'next/headers'
+import LogoutButton from '@/components/LogoutButton'
 
 interface NavItem {
   href: string
@@ -18,7 +20,7 @@ const navSections: NavSection[] = [
   {
     label: '',
     items: [
-      { href: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
+      { href: '/', label: 'Dashboard', icon: 'dashboard' },
     ],
   },
   {
@@ -52,19 +54,19 @@ const navSections: NavSection[] = [
   {
     label: 'Clients',
     items: [
-      { href: '/clients', label: 'Clients', icon: 'clients', disabled: true },
-      { href: '/fulfillment', label: 'Fulfillment', icon: 'fulfillment', disabled: true },
-      { href: '/sops', label: 'SOPs', icon: 'sops', disabled: true },
-      { href: '/va-tasks', label: 'VA Tasks', icon: 'tasks', disabled: true },
+      { href: '/clients', label: 'Clients', icon: 'clients' },
+      { href: '/fulfillment', label: 'Fulfillment', icon: 'fulfillment' },
+      { href: '/sops', label: 'SOPs', icon: 'sops' },
+      { href: '/va-tasks', label: 'VA Tasks', icon: 'tasks' },
     ],
   },
   {
     label: 'Systems',
     items: [
-      { href: '/automations', label: 'Automations', icon: 'automations', disabled: true },
-      { href: '/website-templates', label: 'Templates', icon: 'templates', disabled: true },
-      { href: '/reviews', label: 'Reviews', icon: 'reviews', disabled: true },
-      { href: '/retention', label: 'Retention', icon: 'retention', disabled: true },
+      { href: '/automations', label: 'Automations', icon: 'automations' },
+      { href: '/website-templates', label: 'Templates', icon: 'templates' },
+      { href: '/reviews', label: 'Reviews', icon: 'reviews' },
+      { href: '/retention', label: 'Retention', icon: 'retention' },
     ],
   },
   {
@@ -228,6 +230,9 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
+  const headersList = headers()
+  const pathname = headersList.get('x-invoke-path') || '/'
+
   return (
     <div className="min-h-screen bg-background flex">
       <aside className="w-56 border-r bg-card shrink-0 flex flex-col h-screen sticky top-0 overflow-y-auto">
@@ -267,11 +272,16 @@ export default async function DashboardLayout({
                       </div>
                     )
                   }
+                  const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="flex items-center gap-2.5 px-2 py-1.5 text-sm rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                      className={`flex items-center gap-2.5 px-2 py-1.5 text-sm rounded-md transition-colors ${
+                        isActive
+                          ? 'bg-primary/10 text-primary font-medium'
+                          : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                      }`}
                     >
                       {icons[item.icon]}
                       <span className="truncate">{item.label}</span>
@@ -284,15 +294,7 @@ export default async function DashboardLayout({
         </nav>
 
         <div className="p-2 border-t shrink-0">
-          <button onClick={async () => {
-            await fetch('/api/auth/logout', { method: 'POST' })
-            window.location.href = '/login'
-          }} className="flex items-center gap-2.5 px-2 py-1.5 w-full text-sm rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-            </svg>
-            Lock
-          </button>
+          <LogoutButton />
         </div>
       </aside>
 

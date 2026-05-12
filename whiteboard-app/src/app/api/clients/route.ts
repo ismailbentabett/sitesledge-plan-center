@@ -28,9 +28,23 @@ export async function POST(request: NextRequest) {
 
     const client = await prisma.client.create({
       data: {
-        ...validation.data,
-        startDate: validation.data.startDate ? new Date(validation.data.startDate) : undefined,
-        notes: validation.data.notes || '',
+        businessName: validation.data.businessName,
+        contactName: validation.data.contactName,
+        email: validation.data.email,
+        phone: validation.data.phone,
+        businessType: validation.data.businessType,
+        status: validation.data.status ?? 'prospect',
+        monthlyPrice: validation.data.monthlyPrice,
+        startDate: validation.data.startDate ? new Date(validation.data.startDate) : null,
+        notes: validation.data.notes ?? '',
+        nicheId: validation.data.nicheId ?? null,
+        packageName: validation.data.packageName ?? '',
+        websiteUrl: validation.data.websiteUrl ?? '',
+        ghlSubaccountUrl: validation.data.ghlSubaccountUrl ?? '',
+        googleBusinessProfileUrl: validation.data.googleBusinessProfileUrl ?? '',
+        accessNotes: validation.data.accessNotes ?? '',
+        churnRisk: validation.data.churnRisk ?? 'low',
+        renewalDate: validation.data.renewalDate ? new Date(validation.data.renewalDate) : null,
       },
     })
 

@@ -44,7 +44,7 @@ const defaults = {
 export default function NicheDetailPage() {
   const router = useRouter()
   const params = useParams()
-  const nicheId = params.id as string
+  const nicheId = params?.id as string
   const isNew = nicheId === 'new'
 
   const [niche, setNiche] = useState<Record<string, unknown> | null>(null)

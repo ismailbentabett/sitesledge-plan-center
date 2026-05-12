@@ -24,6 +24,14 @@ export const createClientSchema = z.object({
   monthlyPrice: z.number().int().min(0).max(10000),
   startDate: z.string().datetime().optional(),
   notes: z.string().max(2000).optional(),
+  nicheId: z.string().cuid().optional().nullable(),
+  packageName: z.string().max(100).optional(),
+  websiteUrl: z.string().max(500).optional(),
+  ghlSubaccountUrl: z.string().max(500).optional(),
+  googleBusinessProfileUrl: z.string().max(500).optional(),
+  accessNotes: z.string().max(2000).optional(),
+  churnRisk: z.enum(['low', 'medium', 'high']).optional(),
+  renewalDate: z.string().datetime().optional().nullable(),
 })
 
 export const updateClientSchema = z.object({
@@ -37,6 +45,14 @@ export const updateClientSchema = z.object({
   startDate: z.string().datetime().optional().nullable(),
   churnDate: z.string().datetime().optional().nullable(),
   notes: z.string().max(2000).optional(),
+  nicheId: z.string().cuid().optional().nullable(),
+  packageName: z.string().max(100).optional(),
+  websiteUrl: z.string().max(500).optional(),
+  ghlSubaccountUrl: z.string().max(500).optional(),
+  googleBusinessProfileUrl: z.string().max(500).optional(),
+  accessNotes: z.string().max(2000).optional(),
+  churnRisk: z.enum(['low', 'medium', 'high']).optional(),
+  renewalDate: z.string().datetime().optional().nullable(),
 })
 
 export const updatePillarSchema = z.object({
@@ -65,6 +81,10 @@ export const createVATaskSchema = z.object({
   priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
   dueDate: z.string().datetime().optional().nullable(),
   clientId: z.string().cuid().optional().nullable(),
+  assignedVAName: z.string().max(100).optional(),
+  checklist: z.string().max(5000).optional(),
+  files: z.string().max(5000).optional(),
+  qaStatus: z.enum(['not_reviewed', 'passed', 'failed', 'needs_revision']).optional(),
 })
 
 export const updateVATaskSchema = z.object({
@@ -75,6 +95,10 @@ export const updateVATaskSchema = z.object({
   priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
   dueDate: z.string().datetime().optional().nullable(),
   clientId: z.string().cuid().optional().nullable(),
+  assignedVAName: z.string().max(100).optional(),
+  checklist: z.string().max(5000).optional(),
+  files: z.string().max(5000).optional(),
+  qaStatus: z.enum(['not_reviewed', 'passed', 'failed', 'needs_revision']).optional(),
 })
 
 export const businessModelSchema = z.object({
@@ -274,5 +298,115 @@ export const funnelSchema = z.object({
   costPerBookedCall: z.number().int().min(0).optional(),
   closeRate: z.number().min(0).max(1).optional(),
   status: z.enum(['draft', 'testing', 'active', 'paused', 'retired']).optional(),
+  notes: z.string().max(2000).optional(),
+})
+
+export const fulfillmentTaskSchema = z.object({
+  clientId: z.string().cuid(),
+  title: z.string().min(1).max(200),
+  description: z.string().max(2000).optional(),
+  stage: z.enum(['onboarding', 'setup', 'active', 'review', 'complete']).optional(),
+  status: z.enum(['not_started', 'in_progress', 'done', 'blocked']).optional(),
+  assignedTo: z.string().max(100).optional(),
+  priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
+  dueDate: z.string().datetime().optional().nullable(),
+  checklist: z.string().max(5000).optional(),
+  qaStatus: z.enum(['not_reviewed', 'passed', 'failed', 'needs_revision']).optional(),
+  notes: z.string().max(2000).optional(),
+})
+
+export const sopSchema = z.object({
+  title: z.string().min(1).max(200),
+  category: z.string().max(100).optional(),
+  purpose: z.string().max(1000).optional(),
+  steps: z.string().max(5000).optional(),
+  requiredTools: z.string().max(1000).optional(),
+  inputs: z.string().max(1000).optional(),
+  outputs: z.string().max(1000).optional(),
+  owner: z.string().max(100).optional(),
+  estimatedMinutes: z.number().int().min(0).optional(),
+  checklist: z.string().max(5000).optional(),
+  loomUrl: z.string().max(500).optional(),
+  status: z.enum(['draft', 'active', 'under_review', 'archived']).optional(),
+  notes: z.string().max(2000).optional(),
+})
+
+export const automationTemplateSchema = z.object({
+  name: z.string().min(1).max(200),
+  purpose: z.string().max(1000).optional(),
+  trigger: z.string().max(1000).optional(),
+  action: z.string().max(1000).optional(),
+  packageLevel: z.string().max(100).optional(),
+  ghlWorkflowName: z.string().max(200).optional(),
+  requiredInputs: z.string().max(2000).optional(),
+  setupSteps: z.string().max(5000).optional(),
+  testingSteps: z.string().max(5000).optional(),
+  failureCases: z.string().max(5000).optional(),
+  status: z.enum(['draft', 'tested', 'active', 'deprecated']).optional(),
+  notes: z.string().max(2000).optional(),
+})
+
+export const websiteTemplateSchema = z.object({
+  name: z.string().min(1).max(200),
+  nicheId: z.string().cuid().optional().nullable(),
+  pagesIncluded: z.string().max(2000).optional(),
+  heroHeadline: z.string().max(500).optional(),
+  sections: z.string().max(5000).optional(),
+  cta: z.string().max(500).optional(),
+  seoKeywords: z.string().max(1000).optional(),
+  exampleUrl: z.string().max(500).optional(),
+  status: z.enum(['draft', 'active', 'archived']).optional(),
+  conversionNotes: z.string().max(2000).optional(),
+  notes: z.string().max(2000).optional(),
+})
+
+export const reviewTrackerSchema = z.object({
+  clientId: z.string().cuid(),
+  currentGoogleRating: z.number().min(0).max(5).optional(),
+  currentReviewCount: z.number().int().min(0).optional(),
+  targetReviewCount: z.number().int().min(0).optional(),
+  reviewRequestAutomationStatus: z.string().max(100).optional(),
+  reviewRequestMessage: z.string().max(2000).optional(),
+  reviewLink: z.string().max(500).optional(),
+  newReviewsThisMonth: z.number().int().min(0).optional(),
+  negativeReviews: z.string().max(2000).optional(),
+  responseNeeded: z.boolean().optional(),
+  notes: z.string().max(2000).optional(),
+})
+
+export const retentionPlaybookSchema = z.object({
+  name: z.string().min(1).max(200),
+  trigger: z.string().max(500).optional(),
+  timing: z.string().max(200).optional(),
+  message: z.string().max(2000).optional(),
+  actionSteps: z.string().max(5000).optional(),
+  status: z.enum(['draft', 'active', 'archived']).optional(),
+  notes: z.string().max(2000).optional(),
+})
+
+export const importBatchSchema = z.object({
+  name: z.string().min(1).max(200),
+  source: z.string().max(100).optional(),
+  recordCount: z.number().int().min(0).optional(),
+  status: z.enum(['pending', 'processing', 'completed', 'failed']).optional(),
+  fileName: z.string().max(200).optional(),
+  notes: z.string().max(2000).optional(),
+})
+
+export const importedRecordSchema = z.object({
+  importBatchId: z.string().cuid(),
+  data: z.string().max(10000).optional(),
+  status: z.enum(['pending', 'processed', 'error', 'skipped']).optional(),
+  notes: z.string().max(2000).optional(),
+})
+
+export const integrationConnectionSchema = z.object({
+  name: z.string().min(1).max(200),
+  provider: z.string().max(100).optional(),
+  apiKey: z.string().max(500).optional(),
+  webhookUrl: z.string().max(500).optional(),
+  status: z.enum(['disabled', 'active', 'error']).optional(),
+  lastSyncAt: z.string().datetime().optional().nullable(),
+  syncNotes: z.string().max(2000).optional(),
   notes: z.string().max(2000).optional(),
 })

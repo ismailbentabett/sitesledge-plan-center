@@ -22,6 +22,10 @@ export async function PATCH(request: NextRequest, { params }: { params: { taskId
     if (validation.data.priority !== undefined) data.priority = validation.data.priority
     if (validation.data.dueDate !== undefined) data.dueDate = validation.data.dueDate ? new Date(validation.data.dueDate) : null
     if (validation.data.clientId !== undefined) data.clientId = validation.data.clientId
+    if (validation.data.assignedVAName !== undefined) data.assignedVAName = validation.data.assignedVAName
+    if (validation.data.checklist !== undefined) data.checklist = validation.data.checklist
+    if (validation.data.files !== undefined) data.files = validation.data.files
+    if (validation.data.qaStatus !== undefined) data.qaStatus = validation.data.qaStatus
 
     const updated = await prisma.vATask.update({ where: { id: params.taskId }, data, include: { client: { select: { id: true, businessName: true } } } })
     return NextResponse.json(updated)

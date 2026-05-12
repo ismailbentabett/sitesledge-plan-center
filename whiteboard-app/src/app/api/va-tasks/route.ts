@@ -35,6 +35,10 @@ export async function POST(request: NextRequest) {
         priority: validation.data.priority ?? 'medium',
         dueDate: validation.data.dueDate ? new Date(validation.data.dueDate) : null,
         clientId: validation.data.clientId ?? null,
+        assignedVAName: validation.data.assignedVAName ?? '',
+        checklist: validation.data.checklist ?? '[]',
+        files: validation.data.files ?? '[]',
+        qaStatus: validation.data.qaStatus ?? 'not_reviewed',
       },
       include: { client: { select: { id: true, businessName: true } } },
     })

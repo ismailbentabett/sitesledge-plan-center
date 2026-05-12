@@ -38,6 +38,14 @@ export async function PATCH(request: NextRequest, { params }: { params: { client
     if (validation.data.startDate !== undefined) data.startDate = validation.data.startDate ? new Date(validation.data.startDate) : null
     if (validation.data.churnDate !== undefined) data.churnDate = validation.data.churnDate ? new Date(validation.data.churnDate) : null
     if (validation.data.notes !== undefined) data.notes = validation.data.notes
+    if (validation.data.nicheId !== undefined) data.nicheId = validation.data.nicheId
+    if (validation.data.packageName !== undefined) data.packageName = validation.data.packageName
+    if (validation.data.websiteUrl !== undefined) data.websiteUrl = validation.data.websiteUrl
+    if (validation.data.ghlSubaccountUrl !== undefined) data.ghlSubaccountUrl = validation.data.ghlSubaccountUrl
+    if (validation.data.googleBusinessProfileUrl !== undefined) data.googleBusinessProfileUrl = validation.data.googleBusinessProfileUrl
+    if (validation.data.accessNotes !== undefined) data.accessNotes = validation.data.accessNotes
+    if (validation.data.churnRisk !== undefined) data.churnRisk = validation.data.churnRisk
+    if (validation.data.renewalDate !== undefined) data.renewalDate = validation.data.renewalDate ? new Date(validation.data.renewalDate) : null
 
     const updated = await prisma.client.update({ where: { id: params.clientId }, data })
     return NextResponse.json(updated)

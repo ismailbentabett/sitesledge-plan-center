@@ -31,7 +31,7 @@ const defaults = {
 export default function OfferDetailPage() {
   const router = useRouter()
   const params = useParams()
-  const offerId = params.id as string
+  const offerId = params?.id as string
   const isNew = offerId === 'new'
 
   const [offer, setOffer] = useState<Record<string, unknown> | null>(null)

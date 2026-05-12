@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -23,37 +23,47 @@ model Board {
 }
 
 model Client {
-  id            String       @id @default(cuid())
-  businessName  String
-  contactName   String
-  email         String
-  phone         String
-  businessType  String
-  status        ClientStatus @default(prospect)
-  monthlyPrice  Int
-  startDate     DateTime?
-  churnDate     DateTime?
-  notes         String       @default("")
-  pillars       Pillar[]
-  vaTasks       VATask[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  id                      String   @id @default(cuid())
+  businessName            String
+  contactName             String
+  email                   String
+  phone                   String
+  businessType            String
+  status                  String   @default("prospect")
+  monthlyPrice            Int
+  startDate               DateTime?
+  churnDate               DateTime?
+  notes                   String   @default("")
+  nicheId                 String?
+  packageName             String   @default("")
+  websiteUrl              String   @default("")
+  ghlSubaccountUrl        String   @default("")
+  googleBusinessProfileUrl String   @default("")
+  accessNotes             String   @default("")
+  churnRisk               String   @default("low")
+  renewalDate             DateTime?
+  pillars                 Pillar[]
+  vaTasks                 VATask[]
+  fulfillmentTasks        FulfillmentTask[]
+  reviewTracker           ReviewTracker?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 
   @@index([status])
   @@map("clients")
 }
 
 model Pillar {
-  id          String       @id @default(cuid())
+  id          String   @id @default(cuid())
   clientId    String
-  client      Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  type        PillarType
-  status      PillarStatus @default(not_started)
-  notes       String       @default("")
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  type        String
+  status      String   @default("not_started")
+  notes       String   @default("")
   setupDate   DateTime?
   lastReview  DateTime?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@unique([clientId, type])
   @@index([clientId])
@@ -79,17 +89,21 @@ model FinancialRecord {
 }
 
 model VATask {
-  id          String       @id @default(cuid())
+  id          String   @id @default(cuid())
   title       String
-  description String       @default("")
-  assignedTo  String       @default("")
-  status      TaskStatus   @default(todo)
-  priority    TaskPriority @default(medium)
+  description String   @default("")
+  assignedTo  String   @default("")
+  status      String   @default("todo")
+  priority    String   @default("medium")
   dueDate     DateTime?
   clientId    String?
-  client      Client?      @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  assignedVAName String @default("")
+  checklist   String   @default("[]")
+  files       String   @default("[]")
+  qaStatus    String   @default("not_reviewed")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([status])
   @@index([clientId])
@@ -121,57 +135,57 @@ model BusinessModel {
 }
 
 model Niche {
-  id                          String      @id @default(cuid())
+  id                          String   @id @default(cuid())
   name                        String
-  description                 String      @default("")
+  description                 String   @default("")
   averageTicketValue          Int?
-  repeatPurchasePotentialScore Int        @default(3)
-  callVolumeScore             Int         @default(3)
-  reviewImportanceScore       Int         @default(3)
-  websiteQualityGapScore      Int         @default(3)
-  competitionLevelScore       Int         @default(3)
-  ownerSophisticationScore    Int         @default(3)
-  urgencyScore                Int         @default(3)
-  easeOfFindingLeadsScore     Int         @default(3)
-  easeOfFulfillmentScore      Int         @default(3)
-  retentionPotentialScore     Int         @default(3)
-  affordabilityScore          Int         @default(3)
-  offerAngle                  String      @default("")
-  outreachAngle               String      @default("")
-  objections                  String      @default("")
-  notes                       String      @default("")
-  status                      NicheStatus @default(researching)
-  createdAt                   DateTime    @default(now())
-  updatedAt                   DateTime    @updatedAt
+  repeatPurchasePotentialScore Int     @default(3)
+  callVolumeScore             Int      @default(3)
+  reviewImportanceScore       Int      @default(3)
+  websiteQualityGapScore      Int      @default(3)
+  competitionLevelScore       Int      @default(3)
+  ownerSophisticationScore    Int      @default(3)
+  urgencyScore                Int      @default(3)
+  easeOfFindingLeadsScore     Int      @default(3)
+  easeOfFulfillmentScore      Int      @default(3)
+  retentionPotentialScore     Int      @default(3)
+  affordabilityScore          Int      @default(3)
+  offerAngle                  String   @default("")
+  outreachAngle               String   @default("")
+  objections                  String   @default("")
+  notes                       String   @default("")
+  status                      String   @default("researching")
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
 
   @@index([status])
   @@map("niches")
 }
 
 model Offer {
-  id                  String      @id @default(cuid())
+  id                  String   @id @default(cuid())
   name                String
   targetNicheId       String?
-  status              OfferStatus @default(draft)
+  status              String   @default("draft")
   priceMonthly        Int
   setupFee            Int?
-  mainPromise         String      @default("")
-  mechanism           String      @default("")
-  includedAssets      String      @default("")
-  bonuses             String      @default("")
-  guarantee           String      @default("")
-  riskReversal        String      @default("")
-  urgencyAngle        String      @default("")
-  scarcityAngle       String      @default("")
-  primaryObjection    String      @default("")
-  objectionResponse   String      @default("")
-  coldEmailVersion    String      @default("")
-  coldCallVersion     String      @default("")
-  landingPageHeadline String      @default("")
-  metaAdAngle         String      @default("")
-  notes               String      @default("")
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
+  mainPromise         String   @default("")
+  mechanism           String   @default("")
+  includedAssets      String   @default("")
+  bonuses             String   @default("")
+  guarantee           String   @default("")
+  riskReversal        String   @default("")
+  urgencyAngle        String   @default("")
+  scarcityAngle       String   @default("")
+  primaryObjection    String   @default("")
+  objectionResponse   String   @default("")
+  coldEmailVersion    String   @default("")
+  coldCallVersion     String   @default("")
+  landingPageHeadline String   @default("")
+  metaAdAngle         String   @default("")
+  notes               String   @default("")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   @@index([status])
   @@map("offers")
@@ -239,59 +253,59 @@ model Note {
 }
 
 model Decision {
-  id               String         @id @default(cuid())
+  id               String   @id @default(cuid())
   title            String
-  context          String         @default("")
-  optionsConsidered String        @default("")
-  chosenOption     String         @default("")
-  reason           String         @default("")
-  expectedResult   String         @default("")
+  context          String   @default("")
+  optionsConsidered String   @default("")
+  chosenOption     String   @default("")
+  reason           String   @default("")
+  expectedResult   String   @default("")
   reviewDate       DateTime?
-  outcome          String         @default("")
-  status           DecisionStatus @default(open)
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  outcome          String   @default("")
+  status           String   @default("open")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@index([status])
   @@map("decisions")
 }
 
 model OutreachCampaign {
-  id                  String                 @id @default(cuid())
+  id                  String   @id @default(cuid())
   name                String
   targetNicheId       String?
   offerId             String?
-  channel             String                 @default("")
-  status              OutreachStatus         @default(draft)
-  leadSource          String                 @default("")
-  messageVersion      String                 @default("")
-  callToAction        String                 @default("")
-  dailyVolume         Int                    @default(0)
-  sentCount           Int                    @default(0)
-  replyCount          Int                    @default(0)
-  positiveReplyCount  Int                    @default(0)
-  bookedCallCount     Int                    @default(0)
-  closedWonCount      Int                    @default(0)
-  notes               String                 @default("")
-  createdAt           DateTime               @default(now())
-  updatedAt           DateTime               @updatedAt
+  channel             String   @default("")
+  status              String   @default("draft")
+  leadSource          String   @default("")
+  messageVersion      String   @default("")
+  callToAction        String   @default("")
+  dailyVolume         Int      @default(0)
+  sentCount           Int      @default(0)
+  replyCount          Int      @default(0)
+  positiveReplyCount  Int      @default(0)
+  bookedCallCount     Int      @default(0)
+  closedWonCount      Int      @default(0)
+  notes               String   @default("")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   @@index([status])
   @@map("outreach_campaigns")
 }
 
 model Script {
-  id            String       @id @default(cuid())
+  id            String   @id @default(cuid())
   title         String
-  type          ScriptType   @default(cold_email)
-  channel       ScriptChannel @default(email)
+  type          String   @default("cold_email")
+  channel       String   @default("email")
   targetNicheId String?
   offerId       String?
-  body          String       @default("")
-  status        ScriptStatus @default(draft)
-  notes         String       @default("")
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  body          String   @default("")
+  status        String   @default("draft")
+  notes         String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@index([type])
   @@index([channel])
@@ -300,49 +314,49 @@ model Script {
 }
 
 model Prospect {
-  id                        String           @id @default(cuid())
+  id                        String   @id @default(cuid())
   businessName              String
-  ownerName                 String           @default("")
+  ownerName                 String   @default("")
   nicheId                   String?
-  phone                     String           @default("")
-  email                     String           @default("")
-  website                   String           @default("")
+  phone                     String   @default("")
+  email                     String   @default("")
+  website                   String   @default("")
   googleRating              Float?
   reviewCount               Int?
-  currentWebsiteQualityScore Int             @default(0)
-  painPoint                 String           @default("")
-  offerAngle                String           @default("")
-  status                    ProspectStatus   @default(new)
+  currentWebsiteQualityScore Int     @default(0)
+  painPoint                 String   @default("")
+  offerAngle                String   @default("")
+  status                    String   @default("new")
   lastContactedAt           DateTime?
   nextFollowUpAt            DateTime?
-  expectedMonthlyValue      Int              @default(0)
-  closeProbability          Float            @default(0)
-  notes                     String           @default("")
-  createdAt                 DateTime         @default(now())
-  updatedAt                 DateTime         @updatedAt
+  expectedMonthlyValue      Int      @default(0)
+  closeProbability          Float    @default(0)
+  notes                     String   @default("")
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
 
   @@index([status])
   @@map("prospects")
 }
 
 model Experiment {
-  id                  String             @id @default(cuid())
+  id                  String   @id @default(cuid())
   name                String
-  hypothesis          String             @default("")
-  area                ExperimentArea     @default(outreach)
+  hypothesis          String   @default("")
+  area                String   @default("outreach")
   targetNicheId       String?
   offerId             String?
   outreachCampaignId  String?
   startDate           DateTime?
   endDate             DateTime?
-  metricToImprove     String             @default("")
-  baseline            String             @default("")
-  result              String             @default("")
-  decision            ExperimentDecision @default(inconclusive)
-  status              ExperimentStatus   @default(planned)
-  notes               String             @default("")
-  createdAt           DateTime           @default(now())
-  updatedAt           DateTime           @updatedAt
+  metricToImprove     String   @default("")
+  baseline            String   @default("")
+  result              String   @default("")
+  decision            String   @default("inconclusive")
+  status              String   @default("planned")
+  notes               String   @default("")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   @@index([area])
   @@index([status])
@@ -350,151 +364,194 @@ model Experiment {
 }
 
 model Funnel {
-  id                   String         @id @default(cuid())
+  id                   String   @id @default(cuid())
   name                 String
   targetNicheId        String?
   offerId              String?
-  trafficSource        String         @default("")
-  landingPageUrl       String         @default("")
-  calendarUrl          String         @default("")
-  followUpSequence     String         @default("[]")
-  conversionRate       Float          @default(0)
-  costPerBookedCall    Int            @default(0)
-  closeRate            Float          @default(0)
-  status               FunnelStatus   @default(draft)
-  notes                String         @default("")
-  createdAt            DateTime       @default(now())
-  updatedAt            DateTime       @updatedAt
+  trafficSource        String   @default("")
+  landingPageUrl       String   @default("")
+  calendarUrl          String   @default("")
+  followUpSequence     String   @default("[]")
+  conversionRate       Float    @default(0)
+  costPerBookedCall    Int      @default(0)
+  closeRate            Float    @default(0)
+  status               String   @default("draft")
+  notes                String   @default("")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   @@index([status])
   @@map("funnels")
 }
 
-enum OutreachStatus {
-  draft
-  active
-  paused
-  completed
+model FulfillmentTask {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title       String
+  description String   @default("")
+  stage       String   @default("onboarding")
+  status      String   @default("not_started")
+  assignedTo  String   @default("")
+  priority    String   @default("medium")
+  dueDate     DateTime?
+  checklist   String   @default("[]")
+  qaStatus    String   @default("not_reviewed")
+  notes       String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([status])
+  @@index([stage])
+  @@map("fulfillment_tasks")
 }
 
-enum ScriptType {
-  cold_email
-  cold_call
-  voicemail
-  follow_up
-  linkedin_message
-  sms
+model SOP {
+  id                String   @id @default(cuid())
+  title             String
+  category          String   @default("")
+  purpose           String   @default("")
+  steps             String   @default("[]")
+  requiredTools     String   @default("")
+  inputs            String   @default("")
+  outputs           String   @default("")
+  owner             String   @default("")
+  estimatedMinutes  Int      @default(0)
+  checklist         String   @default("[]")
+  loomUrl           String   @default("")
+  status            String   @default("draft")
+  notes             String   @default("")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([category])
+  @@index([status])
+  @@map("sops")
 }
 
-enum ScriptChannel {
-  email
-  phone
-  linkedin
-  sms
-  in_person
+model AutomationTemplate {
+  id            String   @id @default(cuid())
+  name          String
+  purpose       String   @default("")
+  trigger       String   @default("")
+  action        String   @default("")
+  packageLevel  String   @default("")
+  ghlWorkflowName String @default("")
+  requiredInputs String  @default("[]")
+  setupSteps    String   @default("[]")
+  testingSteps  String   @default("[]")
+  failureCases  String   @default("[]")
+  status        String   @default("draft")
+  notes         String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status])
+  @@map("automation_templates")
 }
 
-enum ScriptStatus {
-  draft
-  active
-  archived
+model WebsiteTemplate {
+  id                String   @id @default(cuid())
+  name              String
+  nicheId           String?
+  pagesIncluded     String   @default("[]")
+  heroHeadline      String   @default("")
+  sections          String   @default("[]")
+  cta               String   @default("")
+  seoKeywords       String   @default("[]")
+  exampleUrl        String   @default("")
+  status            String   @default("draft")
+  conversionNotes   String   @default("")
+  notes             String   @default("")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([status])
+  @@map("website_templates")
 }
 
-enum ProspectStatus {
-  new
-  contacted
-  interested
-  proposal_sent
-  won
-  lost
+model ReviewTracker {
+  id                              String   @id @default(cuid())
+  clientId                        String   @unique
+  client                          Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  currentGoogleRating             Float    @default(0)
+  currentReviewCount              Int      @default(0)
+  targetReviewCount               Int      @default(0)
+  reviewRequestAutomationStatus   String   @default("")
+  reviewRequestMessage            String   @default("")
+  reviewLink                      String   @default("")
+  newReviewsThisMonth             Int      @default(0)
+  negativeReviews                 String   @default("[]")
+  responseNeeded                  Boolean  @default(false)
+  notes                           String   @default("")
+  createdAt                       DateTime @default(now())
+  updatedAt                       DateTime @updatedAt
+
+  @@index([clientId])
+  @@map("review_trackers")
 }
 
-enum ExperimentArea {
-  outreach
-  offer
-  pricing
-  channel
-  funnel
-  ad_creative
+model RetentionPlaybook {
+  id          String   @id @default(cuid())
+  name        String
+  trigger     String   @default("")
+  timing      String   @default("")
+  message     String   @default("")
+  actionSteps String   @default("[]")
+  status      String   @default("draft")
+  notes       String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@map("retention_playbooks")
 }
 
-enum ExperimentDecision {
-  scale
-  keep
-  kill
-  inconclusive
+model ImportBatch {
+  id          String           @id @default(cuid())
+  name        String
+  source      String           @default("")
+  recordCount Int              @default(0)
+  status      String           @default("pending")
+  fileName    String           @default("")
+  notes       String           @default("")
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  records     ImportedRecord[]
+
+  @@index([status])
+  @@map("import_batches")
 }
 
-enum ExperimentStatus {
-  planned
-  running
-  completed
-  archived
+model ImportedRecord {
+  id            String   @id @default(cuid())
+  importBatchId String
+  importBatch   ImportBatch @relation(fields: [importBatchId], references: [id], onDelete: Cascade)
+  data          String   @default("{}")
+  status        String   @default("pending")
+  notes         String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([importBatchId])
+  @@index([status])
+  @@map("imported_records")
 }
 
-enum FunnelStatus {
-  draft
-  testing
-  active
-  paused
-  retired
-}
+model IntegrationConnection {
+  id          String   @id @default(cuid())
+  name        String
+  provider    String   @default("")
+  apiKey      String   @default("")
+  webhookUrl  String   @default("")
+  status      String   @default("disabled")
+  lastSyncAt  DateTime?
+  syncNotes   String   @default("")
+  notes       String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-enum ClientStatus {
-  prospect
-  active
-  churned
-  paused
-}
-
-enum PillarType {
-  seo_website
-  google_reviews
-  missed_call_textback
-  database_reactivation
-}
-
-enum PillarStatus {
-  not_started
-  in_progress
-  active
-  paused
-}
-
-enum TaskStatus {
-  todo
-  in_progress
-  done
-  archived
-}
-
-enum TaskPriority {
-  low
-  medium
-  high
-  urgent
-}
-
-enum NicheStatus {
-  researching
-  testing
-  active
-  paused
-  rejected
-}
-
-enum OfferStatus {
-  draft
-  testing
-  active
-  paused
-  retired
-}
-
-enum DecisionStatus {
-  open
-  decided
-  reviewing
-  validated
-  reversed
+  @@index([status])
+  @@map("integration_connections")
 }

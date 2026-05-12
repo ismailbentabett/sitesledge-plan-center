@@ -19,7 +19,7 @@ const defaults = {
 export default function ScriptDetailPage() {
   const router = useRouter()
   const params = useParams()
-  const itemId = params.id as string
+  const itemId = params?.id as string
   const isNew = itemId === 'new'
 
   const [item, setItem] = useState<Record<string, unknown> | null>(null)
