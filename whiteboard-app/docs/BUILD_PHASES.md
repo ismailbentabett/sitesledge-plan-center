@@ -44,7 +44,7 @@
 | 24 | Funnel Planner | `/funnels` | Funnel |
 | 25 | Phase 2 audit | — | — |
 
-## Milestone 4: Fulfillment & Operations
+## Milestone 4: Fulfillment & Operations (Complete)
 **Phases 26–35** — Client management, fulfillment, SOPs, VA tasks, automations, templates, reviews, retention
 
 | Phase | Name | Route | New Models |
@@ -60,7 +60,7 @@
 | 34 | Churn & Retention Planner | `/retention` | RetentionPlaybook |
 | 35 | Phase 3 audit | — | — |
 
-## Milestone 5: Data & Metrics
+## Milestone 5: Data & Metrics (Complete)
 **Phases 36–40** — CSV import, metrics, reports, integration placeholders
 
 | Phase | Name | Route | New Models |

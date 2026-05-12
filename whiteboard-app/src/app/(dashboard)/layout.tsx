@@ -72,15 +72,15 @@ const navSections: NavSection[] = [
   {
     label: 'Data',
     items: [
-      { href: '/imports', label: 'Imports', icon: 'imports', disabled: true },
-      { href: '/metrics', label: 'Metrics', icon: 'metrics', disabled: true },
-      { href: '/reports', label: 'Reports', icon: 'reports', disabled: true },
+      { href: '/imports', label: 'Imports', icon: 'imports' },
+      { href: '/metrics', label: 'Metrics', icon: 'metrics' },
+      { href: '/reports', label: 'Reports', icon: 'reports' },
     ],
   },
   {
     label: 'Future',
     items: [
-      { href: '/integrations', label: 'Integrations', icon: 'integrations', disabled: true },
+      { href: '/integrations', label: 'Integrations', icon: 'integrations' },
     ],
   },
 ]

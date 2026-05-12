@@ -60,13 +60,16 @@ export default function ImportsPage() {
   const filtered = batches
     .filter((b) => filterStatus === 'all' || b.status === filterStatus)
 
+  const totalRecords = batches.reduce((sum, b) => sum + b.recordCount, 0)
+  const completedCount = batches.filter((b) => b.status === 'completed').length
+
   if (loading) return <div className="p-6 text-muted-foreground">Loading...</div>
 
   return (
     <div className="p-6 max-w-6xl">
       <PageHeader
-        title="Data Imports"
-        description="Track CSV imports and data batches"
+        title="CSV Import / Data Room"
+        description="Import and manage CSV data batches"
         action={
           <button onClick={() => router.push('/imports/new')}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 transition-colors">
@@ -77,6 +80,21 @@ export default function ImportsPage() {
           </button>
         }
       />
+
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="p-4 border rounded-xl bg-card">
+          <p className="text-sm text-muted-foreground">Total Batches</p>
+          <p className="text-2xl font-bold mt-1">{batches.length}</p>
+        </div>
+        <div className="p-4 border rounded-xl bg-card">
+          <p className="text-sm text-muted-foreground">Total Records</p>
+          <p className="text-2xl font-bold mt-1">{totalRecords.toLocaleString()}</p>
+        </div>
+        <div className="p-4 border rounded-xl bg-card">
+          <p className="text-sm text-muted-foreground">Completed</p>
+          <p className="text-2xl font-bold mt-1 text-green-600">{completedCount}</p>
+        </div>
+      </div>
 
       <div className="flex gap-3 mb-4">
         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
@@ -92,7 +110,7 @@ export default function ImportsPage() {
       {filtered.length === 0 ? (
         <EmptyState
           title="No imports yet"
-          description="Track your data import batches here"
+          description="Import CSV data to track and manage records"
           action={{ label: 'New Import', onClick: () => router.push('/imports/new') }}
         />
       ) : (
@@ -102,9 +120,10 @@ export default function ImportsPage() {
               <tr>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Name</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Source</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">File</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Records</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">File</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
                 <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
@@ -113,9 +132,10 @@ export default function ImportsPage() {
                 <tr key={batch.id} className="border-b last:border-0 hover:bg-muted/30">
                   <td className="px-4 py-3 font-medium">{batch.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">{batch.source || '-'}</td>
+                  <td className="px-4 py-3 text-muted-foreground truncate max-w-xs">{batch.fileName || '-'}</td>
                   <td className="px-4 py-3">{batch.recordCount}</td>
                   <td className="px-4 py-3"><StatusBadge label={batch.status} variant={statusColors[batch.status] || 'default'} /></td>
-                  <td className="px-4 py-3 text-muted-foreground truncate max-w-xs">{batch.fileName || '-'}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{new Date(batch.createdAt).toLocaleDateString()}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-2">
                       <button onClick={() => router.push(`/imports/${batch.id}`)}

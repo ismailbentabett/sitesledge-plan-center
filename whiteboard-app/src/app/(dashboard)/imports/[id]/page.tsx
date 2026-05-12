@@ -7,10 +7,6 @@ import StatusBadge from '@/components/ui/StatusBadge'
 
 const statusOptions = ['pending', 'processing', 'completed', 'failed']
 
-const statusColors: Record<string, 'default' | 'success' | 'warning' | 'danger' | 'info'> = {
-  pending: 'default', processing: 'info', completed: 'success', failed: 'danger',
-}
-
 const defaults = {
   name: '',
   source: '',
@@ -18,6 +14,10 @@ const defaults = {
   status: 'pending',
   fileName: '',
   notes: '',
+}
+
+const statusColors: Record<string, 'default' | 'success' | 'warning' | 'danger' | 'info'> = {
+  pending: 'default', processing: 'info', completed: 'success', failed: 'danger',
 }
 
 export default function ImportDetailPage() {
@@ -60,10 +60,11 @@ export default function ImportDetailPage() {
     try {
       const method = isNew ? 'POST' : 'PATCH'
       const url = isNew ? '/api/imports' : `/api/imports/${itemId}`
+      const body = { ...form, recordCount: Number(form.recordCount) }
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(body),
       })
       if (!res.ok) {
         const data = await res.json()
@@ -98,7 +99,7 @@ export default function ImportDetailPage() {
     <div className="p-6 max-w-4xl">
       <PageHeader
         title={isNew ? 'New Import Batch' : form.name}
-        description={isNew ? 'Create a new import batch' : 'Edit import batch'}
+        description={isNew ? 'Create a new CSV import batch' : 'Edit import batch'}
         action={
           !isNew && (
             <div className="flex items-center gap-3">
@@ -114,7 +115,7 @@ export default function ImportDetailPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="p-4 border rounded-xl bg-card space-y-4">
-          <h3 className="text-sm font-semibold">Details</h3>
+          <h3 className="text-sm font-semibold">Batch Info</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">Name</label>
@@ -126,32 +127,29 @@ export default function ImportDetailPage() {
               <input type="text" value={form.source} onChange={(e) => update('source', e.target.value)}
                 className="w-full h-10 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
             </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Record Count</label>
-              <input type="number" value={form.recordCount} onChange={(e) => update('recordCount', parseInt(e.target.value) || 0)}
-                className="w-full h-10 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-            </div>
             <div>
               <label className="block text-sm font-medium mb-1">File Name</label>
               <input type="text" value={form.fileName} onChange={(e) => update('fileName', e.target.value)}
                 className="w-full h-10 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Record Count</label>
+              <input type="number" value={form.recordCount} onChange={(e) => update('recordCount', e.target.value)}
+                className="w-full h-10 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" min="0" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Status</label>
+              <select value={form.status} onChange={(e) => update('status', e.target.value)}
+                className="w-full h-10 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                {statusOptions.map((o) => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Status</label>
-            <select value={form.status} onChange={(e) => update('status', e.target.value)}
-              className="w-full h-10 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-              {statusOptions.map((o) => <option key={o} value={o}>{o}</option>)}
-            </select>
+            <label className="block text-sm font-medium mb-1">Notes</label>
+            <textarea value={form.notes} onChange={(e) => update('notes', e.target.value)} rows={3}
+              className="w-full px-3 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
-        </div>
-
-        <div className="p-4 border rounded-xl bg-card space-y-4">
-          <h3 className="text-sm font-semibold">Notes</h3>
-          <textarea value={form.notes} onChange={(e) => update('notes', e.target.value)} rows={3}
-            className="w-full px-3 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
 
         <div className="flex gap-3">

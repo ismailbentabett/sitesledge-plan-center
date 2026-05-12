@@ -73,3 +73,35 @@
 - **Decision**: Keep `Client.businessType` as a legacy field; new `Client.nicheId` will supersede it
 - **Reason**: Existing data uses businessType as a free-text niche identifier. Migration will map existing values to Niche records where possible.
 - **Date**: 2026-05-09
+
+## Milestone 5 Build Decisions
+
+### 1. Missing Pages Fixed
+- **Decision**: Create `/clients/page.tsx`, `/clients/[id]/page.tsx`, `/va-tasks/page.tsx`, `/va-tasks/[id]/page.tsx`
+- **Reason**: These pages were referenced in the sidebar but did not exist, causing 404 errors. API routes already existed.
+- **Date**: 2026-05-12
+
+### 2. Metrics and Reports APIs Created
+- **Decision**: Create `/api/metrics/route.ts` and `/api/reports/route.ts`
+- **Reason**: These APIs were needed for the Metrics Dashboard and Reports pages. No new models required — they aggregate existing data.
+- **Date**: 2026-05-12
+
+### 3. Sidebar Sections Enabled
+- **Decision**: Enable Data (imports, metrics, reports) and Future (integrations) sidebar sections
+- **Reason**: All pages and APIs for these sections are now implemented.
+- **Date**: 2026-05-12
+
+### 4. Prisma Schema Provider Corrected
+- **Decision**: Changed schema provider from `sqlite` to `postgresql`
+- **Reason**: The docker-compose, .env.example, and all documentation reference PostgreSQL. The schema declaration should match the intended production database.
+- **Date**: 2026-05-12
+
+### 5. Import Detail Page Created
+- **Decision**: Create `/imports/[id]/page.tsx` for import batch editing
+- **Reason**: The list page existed but the detail page was missing.
+- **Date**: 2026-05-12
+
+### 6. Documentation Completed
+- **Decision**: Create PHASE_4_PLAN.md, update README.md, create OPERATOR_MANUAL.md
+- **Reason**: All phases are now complete. Documentation needed to reflect the final state.
+- **Date**: 2026-05-12

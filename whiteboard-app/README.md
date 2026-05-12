@@ -1,148 +1,200 @@
-# Whiteboard App
+# SiteSledge Command Center
 
-A production-ready, self-hosted collaborative whiteboard web application built with Next.js and Excalidraw.
+A private internal business planning and operating system for managing a GoHighLevel-based local service marketing business.
 
-## Tech Stack
-
-- **Frontend**: Next.js 13 (App Router), React 18, TypeScript, Tailwind CSS
-- **Whiteboard**: Excalidraw (MIT licensed, 100% free)
-- **Authentication**: NextAuth.js v4 (Credentials provider)
-- **Database**: PostgreSQL with Prisma ORM
-- **Validation**: Zod
-- **Theme**: next-themes with shadcn-style design system
-- **Deployment**: Docker Compose
+**Not a SaaS product. Not multi-tenant. Single admin user only.**
 
 ## Features
 
-- User registration and authentication with email/password
-- Dashboard to manage whiteboards
-- Full-featured whiteboard editor powered by Excalidraw
-- Automatic and manual save of board state to PostgreSQL
-- Public sharing with read-only links
-- Board ownership and access control
-- Dark mode support
-- Docker-based self-hosting
+### Planning Hub
+- **Business Model Planner** — Store and edit core business assumptions
+- **Niche Research Hub** — Evaluate and score target niches with 12 scoring dimensions
+- **Offer Builder** — Build and track offer positioning, linked to niches
+- **Financial Model** — Model business economics with scenarios and projections
+- **Weekly Planning Room** — Weekly business review and goal setting
 
-## Local Development Setup
+### Workspace
+- **Whiteboards** — Excalidraw-based visual planning canvas with PostgreSQL persistence
+- **Notes** — Quick notes with pinning and tags
+- **Decision Log** — Track important business decisions with outcomes
+
+### Sales & Growth
+- **Outreach Planner** — Track cold outreach campaigns with rate calculations
+- **Script Library** — Store and organize sales scripts by type and channel
+- **Sales Pipeline** — Kanban-style prospect tracking with follow-up management
+- **Experiment Tracker** — Track business experiments with decisions (Scale/Keep/Kill)
+- **Funnel Planner** — Map and track sales funnels with stage definitions
+
+### Clients & Operations
+- **Client Tracker** — Manage clients, track MRR, churn risk, and access URLs
+- **Fulfillment Tracker** — Track client onboarding and setup tasks by stage
+- **SOP Library** — Standard operating procedures with categories and checklists
+- **VA Task System** — Delegate tasks to virtual assistants with QA tracking
+
+### Systems
+- **Automation Map** — GHL automation templates with setup/testing steps
+- **Website Template Library** — Reusable website templates linked to niches
+- **Review System** — Track Google review progress per client
+- **Retention Planner** — Churn prevention playbooks
+
+### Data & Metrics
+- **CSV Import** — Track import batches and record counts
+- **Metrics Dashboard** — Aggregated metrics from all modules
+- **Reports** — Generate weekly reviews, client reports, and outreach reports
+- **Integrations** — Placeholder entries for future CRM connections
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 13 App Router |
+| Language | TypeScript |
+| UI | React 18 + Tailwind CSS |
+| Database | PostgreSQL (or SQLite for local dev) |
+| ORM | Prisma |
+| Validation | Zod |
+| Canvas | Excalidraw |
+| Auth | Custom cookie-based password gate |
+| Package Manager | pnpm |
+
+## Getting Started
 
 ### Prerequisites
-
 - Node.js 18+
 - pnpm
-- PostgreSQL
+- Docker (optional, for PostgreSQL)
 
-### Installation
+### Quick Start (SQLite — local dev)
 
 ```bash
-# Navigate to the project
-cd whiteboard-app
+# Install dependencies
+pnpm install
+
+# Set up environment
+cp .env.example .env
+# Edit .env: set DATABASE_URL="file:./dev.db" and ADMIN_PASSWORD
+
+# Generate Prisma client + migrate
+pnpm db:generate
+pnpm db:migrate
+
+# Run dev server
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) and enter your admin password.
+
+### With Docker (PostgreSQL)
+
+```bash
+# Start PostgreSQL
+docker compose up -d
 
 # Install dependencies
 pnpm install
 
-# Copy environment variables
+# Set up environment
 cp .env.example .env
+# Edit .env: set DATABASE_URL to match docker-compose and ADMIN_PASSWORD
 
-# Update DATABASE_URL in .env to point to your PostgreSQL instance
+# Generate Prisma client + migrate
+pnpm db:generate
+pnpm db:migrate
 
-# Run database migrations
-pnpm prisma migrate dev
-
-# Start the development server
+# Run dev server
 pnpm dev
 ```
 
-The app will be available at `http://localhost:3000`.
+### Production Build
 
-## Docker Setup
+```bash
+pnpm build
+pnpm start
+```
 
-### Build and Run
-
+Or with Docker:
 ```bash
 docker compose up --build
 ```
 
-This starts:
-- PostgreSQL database on port 5432
-- Next.js app on port 3000
-
-### Stop
-
-```bash
-docker compose down
-```
-
-### Stop and Remove Volumes
-
-```bash
-docker compose down -v
-```
-
 ## Environment Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://postgres:postgres@localhost:5432/whiteboard?schema=public` |
-| `NEXTAUTH_SECRET` | Secret for signing JWT tokens | Generate with `openssl rand -base64 32` |
-| `NEXTAUTH_URL` | Base URL of the app | `http://localhost:3000` |
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| `DATABASE_URL` | Database connection | `postgresql://postgres:postgres@localhost:5432/whiteboard?schema=public` or `file:./dev.db` |
+| `ADMIN_PASSWORD` | Admin password gate | `your-secure-password` |
 
-## Database Migration
+## Project Scripts
 
-```bash
-# Create a new migration
-pnpm prisma migrate dev --name <migration_name>
+| Script | Command |
+|--------|---------|
+| `pnpm dev` | Start dev server |
+| `pnpm build` | Production build |
+| `pnpm start` | Start production server |
+| `pnpm lint` | ESLint |
+| `pnpm typecheck` | TypeScript type check |
+| `pnpm db:generate` | Generate Prisma client |
+| `pnpm db:migrate` | Run migrations |
+| `pnpm db:push` | Push schema to DB |
+| `pnpm db:studio` | Open Prisma Studio |
 
-# Apply pending migrations
-pnpm prisma migrate deploy
+## Architecture
 
-# Reset database (WARNING: deletes all data)
-pnpm prisma migrate reset
+### Routes
+All routes are protected behind the admin password gate except `/login` and `/share/[publicId]`.
 
-# Open Prisma Studio (database GUI)
-pnpm prisma studio
-```
+| Route | Purpose |
+|-------|---------|
+| `/login` | Password gate |
+| `/dashboard` | Command Dashboard (business overview) |
+| `/business-model` | Business Model Planner |
+| `/niches` | Niche Research Hub |
+| `/offers` | Offer Builder |
+| `/financial-model` | Financial Model |
+| `/weekly-planning` | Weekly Planning Room |
+| `/whiteboards` | Whiteboard list |
+| `/boards/[id]` | Whiteboard editor |
+| `/notes` | Notes |
+| `/decisions` | Decision Log |
+| `/outreach` | Outreach Planner |
+| `/scripts` | Script Library |
+| `/pipeline` | Sales Pipeline |
+| `/experiments` | Experiment Tracker |
+| `/funnels` | Funnel Planner |
+| `/clients` | Client Tracker |
+| `/fulfillment` | Fulfillment Tracker |
+| `/sops` | SOP Library |
+| `/va-tasks` | VA Task System |
+| `/automations` | Automation Map |
+| `/website-templates` | Website Template Library |
+| `/reviews` | Review System |
+| `/retention` | Retention Planner |
+| `/imports` | CSV Import |
+| `/metrics` | Metrics Dashboard |
+| `/reports` | Reports |
+| `/integrations` | Integration Placeholders |
+| `/share/[publicId]` | Public shared whiteboard |
 
-## Creating an Account
+### Database Models
+22 models: Board, Client, Pillar, FinancialRecord, VATask, BusinessModel, Niche, Offer, FinancialScenario, WeeklyPlan, Note, Decision, OutreachCampaign, Script, Prospect, Experiment, Funnel, FulfillmentTask, SOP, AutomationTemplate, WebsiteTemplate, ReviewTracker, RetentionPlaybook, ImportBatch, ImportedRecord, IntegrationConnection.
 
-1. Navigate to `http://localhost:3000`
-2. Click "Get started" or "Create free account"
-3. Fill in name, email, and password
-4. Click "Create account"
-5. Sign in with your credentials
+### Auth
+Custom cookie-based auth. Password is compared against `ADMIN_PASSWORD` env var. Cookie expires in 7 days. Middleware protects all routes except `/login`, `/api/auth/*`, `/share`, and static assets.
 
-## Creating a Board
-
-1. Sign in to your account
-2. Go to the Dashboard
-3. Click "New Board"
-4. You will be redirected to the board editor
-
-## How Sharing Works
-
-1. On the board page, click "Share"
-2. The board becomes publicly accessible via `/share/{publicId}`
-3. Anyone with the link can view the board in read-only mode
-4. Click "Unshare" to make the board private again
-5. The share link will no longer work after unsharing
+## Documentation
+- `/docs/CURRENT_STATE.md` — Current app state
+- `/docs/PRODUCT_SPEC.md` — Product specification
+- `/docs/MODULE_MAP.md` — Module map with routes and models
+- `/docs/DATA_MODEL.md` — Database model definitions
+- `/docs/ROUTES_AND_PAGES.md` — Route definitions
+- `/docs/API_SPEC.md` — API specification
+- `/docs/UI_SPEC.md` — UI specification
+- `/docs/BUILD_PHASES.md` — Build phase tracking
+- `/docs/ACCEPTANCE_TESTS.md` — Acceptance test checklist
+- `/docs/DECISIONS.md` — Architecture decisions log
+- `/docs/PHASE_2_PLAN.md` — Phase 2 plan
+- `/docs/PHASE_3_PLAN.md` — Phase 3 plan
+- `/docs/PHASE_4_PLAN.md` — Phase 4 plan
 
 ## License
-
-This project uses **Excalidraw** which is MIT licensed - completely free for any use, commercial or personal. No license keys required.
-
-## Known Limitations
-
-- No real-time collaboration (single-user editing)
-- No board versioning or history
-- Assets (images) are stored inline in the state JSON
-- No folder organization for boards
-- No search functionality
-
-## Future Improvements
-
-- Real-time collaboration with WebSockets
-- Board versioning and undo history
-- Image asset upload to storage
-- Board folders and tags
-- Search and filter boards
-- Custom board templates
-- Role-based access control for shared boards
+Private — not for public distribution.

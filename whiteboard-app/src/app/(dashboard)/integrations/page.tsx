@@ -6,13 +6,15 @@ import PageHeader from '@/components/ui/PageHeader'
 import EmptyState from '@/components/ui/EmptyState'
 import StatusBadge from '@/components/ui/StatusBadge'
 
-interface Integration {
+interface IntegrationConnection {
   id: string
   name: string
   provider: string
   status: string
   lastSyncAt: string | null
+  notes: string
   createdAt: string
+  updatedAt: string
 }
 
 const statusColors: Record<string, 'default' | 'success' | 'warning' | 'danger' | 'info'> = {
@@ -23,7 +25,7 @@ const statusColors: Record<string, 'default' | 'success' | 'warning' | 'danger' 
 
 export default function IntegrationsPage() {
   const router = useRouter()
-  const [connections, setConnections] = useState<Integration[]>([])
+  const [connections, setConnections] = useState<IntegrationConnection[]>([])
   const [loading, setLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState('all')
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -63,7 +65,7 @@ export default function IntegrationsPage() {
     <div className="p-6 max-w-6xl">
       <PageHeader
         title="Integrations"
-        description="Manage external service connections"
+        description="Manage external system connections (placeholders)"
         action={
           <button onClick={() => router.push('/integrations/new')}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 transition-colors">
@@ -74,6 +76,10 @@ export default function IntegrationsPage() {
           </button>
         }
       />
+
+      <div className="p-4 mb-6 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 text-sm border border-yellow-200 dark:border-yellow-800">
+        These are placeholder entries for future CRM and external system integrations. No real API connections are active.
+      </div>
 
       <div className="flex gap-3 mb-4">
         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
@@ -88,7 +94,7 @@ export default function IntegrationsPage() {
       {filtered.length === 0 ? (
         <EmptyState
           title="No integrations yet"
-          description="Connect external services to extend functionality"
+          description="Add placeholder entries for future system connections"
           action={{ label: 'Add Connection', onClick: () => router.push('/integrations/new') }}
         />
       ) : (
