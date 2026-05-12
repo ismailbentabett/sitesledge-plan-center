@@ -14,6 +14,9 @@
 | ORM | Prisma | 5.22 |
 | Validation | Zod | 3.23 |
 | Canvas | Excalidraw | 0.18.1 |
+| Charts | Recharts | 3.8 |
+| AI | OpenAI SDK | 6.37 |
+| CSV Parsing | PapaParse | 5.5 |
 | Theme | next-themes | 0.4 |
 | Package Manager | pnpm | — |
 | Auth | Custom cookie-based password gate | — |
@@ -41,6 +44,7 @@ pnpm dev
 |----------|---------|---------|
 | `DATABASE_URL` | Database connection | `postgresql://...` or `file:./dev.db` |
 | `ADMIN_PASSWORD` | Password gate | `your-secure-password` |
+| `OPENAI_API_KEY` | AI features (optional) | `sk-...` (all AI features degrade gracefully when unset) |
 
 ## All Routes (30+ pages)
 
@@ -71,9 +75,9 @@ pnpm dev
 | `/website-templates` | Working | Website Template Library |
 | `/reviews` | Working | Review System |
 | `/retention` | Working | Retention Planner |
-| `/imports` | Working | CSV Import |
-| `/metrics` | Working | Metrics Dashboard |
-| `/reports` | Working | Reports |
+| `/imports` | Working (AI-enhanced) | CSV Import with AI column mapping & cleaning |
+| `/metrics` | Working (AI-enhanced) | Metrics Dashboard with charts, AI narrative & anomaly detection |
+| `/reports` | Working (AI-enhanced) | Reports with optional AI analysis & print export |
 | `/integrations` | Working | Integration Placeholders |
 
 ## Database Models (26 total)
@@ -94,8 +98,11 @@ All API routes are protected by auth middleware. 29+ route handlers covering CRU
 - Dark/light theme toggle
 - Zod validation on all API inputs
 - Sidebar navigation with active route highlighting
-- Metrics dashboard aggregating data from all modules
-- Report generation (weekly review, client report, outreach report)
+- Metrics dashboard with Recharts visualizations (MRR trend, client growth, pipeline funnel)
+- AI-powered insights: executive narrative, anomaly detection, report analysis (when OPENAI_API_KEY set)
+- AI-powered CSV imports: column mapping, data cleaning, bulk insert into Clients/Prospects
+- Report generation (weekly review, client report, outreach report) with optional AI analysis
+- Print-friendly report export
 - Docker Compose for local PostgreSQL
 
 ## What Is Fixed
@@ -106,6 +113,20 @@ All API routes are protected by auth middleware. 29+ route handlers covering CRU
 - ✅ `/api/metrics` — was missing, now created
 - ✅ `/api/reports` — was missing, now created
 - ✅ Prisma schema provider — corrected to PostgreSQL
+- ✅ AI modules — Imports, Metrics, Reports enhanced with OpenAI-powered features
+
+## AI Features
+
+All AI features use the `OPENAI_API_KEY` environment variable and degrade gracefully:
+- **No key set** → all modules work identically to their pre-AI behavior
+- **Invalid key** → AI calls fail silently, modules fall back to non-AI mode
+- **Rate limited** → `withFallback()` catches errors and returns defaults
+
+| Module | AI Features | Model Used |
+|--------|-----------|------------|
+| Imports | Column mapping, data cleaning validation | GPT-4o-mini |
+| Metrics | Executive narrative, anomaly detection with suggestions | GPT-4o-mini |
+| Reports | AI-generated analysis per report type | GPT-4o-mini |
 
 ## Constraints
 

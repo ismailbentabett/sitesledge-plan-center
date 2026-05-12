@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import PageHeader from '@/components/ui/PageHeader'
-import EmptyState from '@/components/ui/EmptyState'
+import { useState, useEffect, useCallback } from 'react'
+import ModulePage from '@/components/ui/ModulePage'
+import { ConfirmDialog } from '@/components/ui/Dialog'
+import Button from '@/components/ui/Button'
+import { useToast, ToastContainer } from '@/components/Toast'
 import { calculateSummary } from '@/lib/financial-calculations'
 
 interface Scenario {
@@ -41,20 +43,25 @@ const defaults = {
 }
 
 export default function FinancialModelPage() {
+  const { toasts, dismissToast, success, error } = useToast()
   const [scenarios, setScenarios] = useState<Scenario[]>([])
   const [loading, setLoading] = useState(true)
-  const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState(defaults)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Scenario | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
-  useEffect(() => { fetchScenarios() }, [])
-
-  const fetchScenarios = async () => {
+  const fetchScenarios = useCallback(async () => {
     try {
       const res = await fetch('/api/financial-scenarios')
       if (res.ok) setScenarios(await res.json())
-    } catch { /* ignore */ } finally { setLoading(false) }
-  }
+    } catch {
+      error('Failed to load scenarios')
+    } finally {
+      setLoading(false)
+    }
+  }, [error])
+
+  useEffect(() => { fetchScenarios() }, [fetchScenarios])
 
   const handleCreate = async () => {
     try {
@@ -67,117 +74,138 @@ export default function FinancialModelPage() {
         const saved = await res.json()
         setScenarios([saved, ...scenarios])
         setForm(defaults)
+        success('Scenario created')
       }
-    } catch { /* ignore */ }
+    } catch {
+      error('Failed to create scenario')
+    }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this scenario?')) return
-    setDeletingId(id)
+  const handleDelete = useCallback(async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
     try {
-      const res = await fetch(`/api/financial-scenarios/${id}`, { method: 'DELETE' })
-      if (res.ok) setScenarios(scenarios.filter((s) => s.id !== id))
-    } catch { /* ignore */ } finally { setDeletingId(null) }
-  }
-
-  if (loading) return <div className="p-6 text-muted-foreground">Loading...</div>
+      const res = await fetch(`/api/financial-scenarios/${deleteTarget.id}`, { method: 'DELETE' })
+      if (res.ok) {
+        setScenarios((prev) => prev.filter((s) => s.id !== deleteTarget.id))
+        success('Scenario deleted')
+      } else {
+        error('Failed to delete scenario')
+      }
+    } catch {
+      error('Failed to delete scenario')
+    } finally {
+      setDeleting(false)
+      setDeleteTarget(null)
+    }
+  }, [deleteTarget, success, error])
 
   return (
-    <div className="p-6 max-w-6xl">
-      <PageHeader title="Financial Model" description="Model your business economics with scenarios" />
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-1 space-y-4">
-          <div className="p-4 border rounded-xl bg-card space-y-4">
-            <h3 className="text-sm font-semibold">New Scenario</h3>
+    <>
+      <ModulePage
+        title="Financial Model"
+        description="Model your business economics with scenarios"
+        loading={loading && scenarios.length === 0}
+      >
+        {/* New Scenario Form */}
+        <div className="p-4 border rounded-xl bg-card space-y-4">
+          <h3 className="text-sm font-semibold">New Scenario</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div>
-              <label className="block text-sm font-medium mb-1">Name</label>
+              <label className="block text-xs font-medium mb-1">Name</label>
               <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium mb-1">Price/mo ($)</label>
-                <input type="number" value={form.averageMonthlyPrice} onChange={(e) => setForm({ ...form, averageMonthlyPrice: parseInt(e.target.value) || 0 })}
-                  className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Current Clients</label>
-                <input type="number" value={form.currentClients} onChange={(e) => setForm({ ...form, currentClients: parseInt(e.target.value) || 0 })}
-                  className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">New Clients/mo</label>
-                <input type="number" value={form.newClientsPerMonth} onChange={(e) => setForm({ ...form, newClientsPerMonth: parseInt(e.target.value) || 0 })}
-                  className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Churn Rate</label>
-                <input type="number" step="0.01" value={form.monthlyChurnRate} onChange={(e) => setForm({ ...form, monthlyChurnRate: parseFloat(e.target.value) || 0 })}
-                  className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Fixed Costs ($)</label>
-                <input type="number" value={form.monthlyFixedCosts} onChange={(e) => setForm({ ...form, monthlyFixedCosts: parseInt(e.target.value) || 0 })}
-                  className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Software/Client ($)</label>
-                <input type="number" value={form.softwareCostPerClient ?? 0} onChange={(e) => setForm({ ...form, softwareCostPerClient: parseInt(e.target.value) || 0 })}
-                  className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Months to Project</label>
-                <input type="number" value={form.monthsToProject} onChange={(e) => setForm({ ...form, monthsToProject: parseInt(e.target.value) || 12 })}
-                  className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-              </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">Price/mo ($)</label>
+              <input type="number" value={form.averageMonthlyPrice} onChange={(e) => setForm({ ...form, averageMonthlyPrice: parseInt(e.target.value) || 0 })}
+                className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
             </div>
-            <button onClick={handleCreate}
-              className="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 transition-colors">
-              Create Scenario
-            </button>
+            <div>
+              <label className="block text-xs font-medium mb-1">Current Clients</label>
+              <input type="number" value={form.currentClients} onChange={(e) => setForm({ ...form, currentClients: parseInt(e.target.value) || 0 })}
+                className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">New Clients/mo</label>
+              <input type="number" value={form.newClientsPerMonth} onChange={(e) => setForm({ ...form, newClientsPerMonth: parseInt(e.target.value) || 0 })}
+                className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">Churn Rate</label>
+              <input type="number" step="0.01" value={form.monthlyChurnRate} onChange={(e) => setForm({ ...form, monthlyChurnRate: parseFloat(e.target.value) || 0 })}
+                className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">Fixed Costs ($)</label>
+              <input type="number" value={form.monthlyFixedCosts} onChange={(e) => setForm({ ...form, monthlyFixedCosts: parseInt(e.target.value) || 0 })}
+                className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">Software/Client ($)</label>
+              <input type="number" value={form.softwareCostPerClient ?? 0} onChange={(e) => setForm({ ...form, softwareCostPerClient: parseInt(e.target.value) || 0 })}
+                className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">Months to Project</label>
+              <input type="number" value={form.monthsToProject} onChange={(e) => setForm({ ...form, monthsToProject: parseInt(e.target.value) || 12 })}
+                className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
           </div>
+          <Button onClick={handleCreate}>Create Scenario</Button>
         </div>
 
-        <div className="lg:col-span-2">
-          {scenarios.length === 0 ? (
-            <EmptyState title="No scenarios yet" description="Create a scenario to model your business economics" />
-          ) : (
-            <div className="space-y-4">
-              {scenarios.map((s) => {
-                const summary = calculateSummary({
-                  averageMonthlyPrice: s.averageMonthlyPrice,
-                  currentClients: s.currentClients,
-                  newClientsPerMonth: s.newClientsPerMonth,
-                  monthlyChurnRate: s.monthlyChurnRate,
-                  monthlyFixedCosts: s.monthlyFixedCosts,
-                  softwareCostPerClient: s.softwareCostPerClient ?? 0,
-                  monthsToProject: s.monthsToProject,
-                })
-                return (
-                  <div key={s.id} className="p-4 border rounded-xl bg-card space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold">{s.name}</h3>
-                      <button onClick={() => handleDelete(s.id)} disabled={deletingId === s.id}
-                        className="text-xs text-destructive hover:text-destructive/80 disabled:opacity-50">Delete</button>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      <div><p className="text-xs text-muted-foreground">Current MRR</p><p className="text-lg font-bold">${summary.currentMRR.toLocaleString()}</p></div>
-                      <div><p className="text-xs text-muted-foreground">Projected MRR</p><p className="text-lg font-bold">${summary.projectedMRR.toLocaleString()}</p></div>
-                      <div><p className="text-xs text-muted-foreground">Projected Clients</p><p className="text-lg font-bold">{summary.projectedClients}</p></div>
-                      <div><p className="text-xs text-muted-foreground">Monthly Profit</p><p className={`text-lg font-bold ${summary.projectedMonthlyProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>${summary.projectedMonthlyProfit.toLocaleString()}</p></div>
-                      <div><p className="text-xs text-muted-foreground">Break-even</p><p className="text-lg font-bold">{summary.breakEvenMonth ? `Month ${summary.breakEvenMonth}` : 'N/A'}</p></div>
-                      <div><p className="text-xs text-muted-foreground">Cumulative Profit</p><p className={`text-lg font-bold ${summary.projectedCumulativeProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>${summary.projectedCumulativeProfit.toLocaleString()}</p></div>
-                      <div><p className="text-xs text-muted-foreground">Total Churned</p><p className="text-lg font-bold">{summary.totalChurned}</p></div>
-                      <div><p className="text-xs text-muted-foreground">Total Net New</p><p className="text-lg font-bold">{summary.totalNetNew}</p></div>
-                    </div>
+        {/* Scenarios */}
+        {scenarios.length === 0 ? (
+          <div className="text-center py-12 border rounded-xl bg-card">
+            <p className="text-sm text-muted-foreground">No scenarios yet</p>
+            <p className="text-xs text-muted-foreground mt-1">Create a scenario to model your business economics</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {scenarios.map((s) => {
+              const summary = calculateSummary({
+                averageMonthlyPrice: s.averageMonthlyPrice,
+                currentClients: s.currentClients,
+                newClientsPerMonth: s.newClientsPerMonth,
+                monthlyChurnRate: s.monthlyChurnRate,
+                monthlyFixedCosts: s.monthlyFixedCosts,
+                softwareCostPerClient: s.softwareCostPerClient ?? 0,
+                monthsToProject: s.monthsToProject,
+              })
+              return (
+                <div key={s.id} className="p-4 border rounded-xl bg-card space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold">{s.name}</h3>
+                    <button onClick={() => setDeleteTarget(s)} className="text-xs text-destructive hover:text-destructive/80">Delete</button>
                   </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div><p className="text-xs text-muted-foreground">Current MRR</p><p className="text-lg font-bold">${summary.currentMRR.toLocaleString()}</p></div>
+                    <div><p className="text-xs text-muted-foreground">Projected MRR</p><p className="text-lg font-bold">${summary.projectedMRR.toLocaleString()}</p></div>
+                    <div><p className="text-xs text-muted-foreground">Projected Clients</p><p className="text-lg font-bold">{summary.projectedClients}</p></div>
+                    <div><p className="text-xs text-muted-foreground">Monthly Profit</p><p className={`text-lg font-bold ${summary.projectedMonthlyProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>${summary.projectedMonthlyProfit.toLocaleString()}</p></div>
+                    <div><p className="text-xs text-muted-foreground">Break-even</p><p className="text-lg font-bold">{summary.breakEvenMonth ? `Month ${summary.breakEvenMonth}` : 'N/A'}</p></div>
+                    <div><p className="text-xs text-muted-foreground">Cumulative Profit</p><p className={`text-lg font-bold ${summary.projectedCumulativeProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>${summary.projectedCumulativeProfit.toLocaleString()}</p></div>
+                    <div><p className="text-xs text-muted-foreground">Total Churned</p><p className="text-lg font-bold">{summary.totalChurned}</p></div>
+                    <div><p className="text-xs text-muted-foreground">Total Net New</p><p className="text-lg font-bold">{summary.totalNetNew}</p></div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </ModulePage>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title="Delete Scenario"
+        description={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        loading={deleting}
+      />
+
+      {typeof window !== 'undefined' && <ToastContainer toasts={toasts} onDismiss={dismissToast} />}
+    </>
   )
 }

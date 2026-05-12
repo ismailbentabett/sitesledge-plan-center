@@ -7,64 +7,45 @@ Phase 4 covers data import, metrics aggregation, reporting, and integration plac
 - **Status**: Complete
 - **Output**: This document
 
-## Phase 37: CSV Import / Data Room
-- **Route**: `/imports`, `/imports/[id]`
+## Phase 37: CSV Import / Data Room (AI-Enhanced)
+- **Route**: `/imports`, `/imports/[id]`, `/imports/new`
 - **Model**: `ImportBatch`, `ImportedRecord`
-- **Purpose**: Track CSV import batches and their records
+- **Purpose**: Upload CSV files, AI-powered column mapping, data cleaning, and bulk import into target models
 - **Features**:
-  - List import batches
-  - Create/edit/delete batch
-  - Track source, file name, record count, status
-  - Status: pending, processing, completed, failed
+  - File upload with drag-and-drop
+  - CSV parsing and preview (first 10 rows)
+  - AI column mapping (suggests CSV header → DB field mappings)
+  - AI data cleaning (flags bad emails, phones, prices, etc.)
+  - Bulk insert into Clients or Prospects
+  - Manual override on all AI suggestions
+  - Graceful fallback: works fully without OPENAI_API_KEY
+- **AI Routes**: `/api/imports/ai-map`, `/api/imports/ai-clean`, `/api/imports/csv`, `/api/imports/bulk-insert`
 - **Dashboard connections**: Total imports count
-- **Acceptance tests**:
-  1. Can create import batch
-  2. Can edit batch status
-  3. Can delete batch
-  4. Refresh preserves data
-  5. Build passes
+- **Status**: Complete
 
-## Phase 38: Metrics Dashboard
+## Phase 38: Metrics Dashboard (AI-Enhanced)
 - **Route**: `/metrics`
-- **API**: `/api/metrics`
-- **Purpose**: Aggregated metrics from all modules in one view
-- **No new models** — reads from existing data
-- **Widgets**:
-  - MRR (from financial records or active clients)
-  - Active clients count
-  - Prospects count
-  - Average new clients per month
-  - Active campaigns count
-  - Running experiments count
-  - Overdue tasks count
-  - High churn risk clients
-  - VA task stats
-  - Content counts (whiteboards, notes, decisions, SOPs)
-  - Active niches/offers
-  - Recent financial records table
-- **Acceptance tests**:
-  1. Metrics page loads
-  2. Uses real data from database
-  3. Empty states when data missing
-  4. Dashboard and metrics are consistent
-  5. Build passes
+- **API**: `/api/metrics`, `/api/metrics/trends`, `/api/metrics/narrative`, `/api/metrics/anomalies`
+- **Purpose**: Aggregated metrics with Recharts visualizations and AI-powered insights
+- **Charts**: MRR trend line, client growth area chart, pipeline funnel bar chart
+- **AI Features**:
+  - Executive narrative: 3-5 paragraph summary generated from metrics data
+  - Anomaly detection: flags metrics >30% outside 3-month average with AI-suggested causes
+  - Graceful fallback: works fully without OPENAI_API_KEY
+- **Widgets**: All existing widgets preserved + charts + AI sections
+- **Status**: Complete
 
-## Phase 39: Reports
+## Phase 39: Reports (AI-Enhanced)
 - **Route**: `/reports`
-- **API**: `/api/reports?type=weekly|clients|outreach`
-- **Purpose**: Generate internal reports from database records
-- **No new models** — reads and formats existing data
-- **Report types**:
-  - Weekly Business Review: combines weekly plan, financials, sales, experiments, decisions
-  - Client Report: client counts, MRR, by status, by churn risk
-  - Outreach Report: campaign totals, reply rates, booked rates
-- **Acceptance tests**:
-  1. Can generate weekly business review
-  2. Can generate client report
-  3. Can generate outreach report
-  4. Reports use real database records
-  5. Missing data handled clearly
-  6. Build passes
+- **API**: `/api/reports?type=weekly|clients|outreach&ai=true`
+- **Purpose**: Generate internal reports with optional AI analysis
+- **Report types**: Weekly Business Review, Client Report, Outreach Report
+- **AI Features**:
+  - AI toggle on report generation page
+  - Per-report-type AI analysis (health scores, recommendations, risk flags)
+  - Graceful fallback: works fully without OPENAI_API_KEY
+- **Export**: Print-friendly view via window.print()
+- **Status**: Complete
 
 ## Phase 40: Integration Placeholders
 - **Route**: `/integrations`, `/integrations/[id]`

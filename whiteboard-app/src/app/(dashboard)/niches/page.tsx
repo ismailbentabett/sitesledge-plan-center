@@ -1,10 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import PageHeader from '@/components/ui/PageHeader'
-import EmptyState from '@/components/ui/EmptyState'
+import ModulePage from '@/components/ui/ModulePage'
+import DataTable, { Column } from '@/components/ui/DataTable'
+import { ConfirmDialog } from '@/components/ui/Dialog'
+import Button from '@/components/ui/Button'
+import Select from '@/components/ui/Select'
 import StatusBadge from '@/components/ui/StatusBadge'
+import { useToast, ToastContainer } from '@/components/Toast'
+import { formatRelativeDate } from '@/lib/formatters'
 
 interface Niche {
   id: string
@@ -26,139 +31,113 @@ const statusColors: Record<string, 'default' | 'success' | 'warning' | 'danger' 
 
 export default function NichesPage() {
   const router = useRouter()
+  const { toasts, dismissToast, success, error } = useToast()
   const [niches, setNiches] = useState<Niche[]>([])
   const [loading, setLoading] = useState(true)
-  const [sortBy, setSortBy] = useState<'opportunityScore' | 'name' | 'createdAt'>('opportunityScore')
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
-  const [filterStatus, setFilterStatus] = useState<string>('all')
-  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [deleteTarget, setDeleteTarget] = useState<Niche | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
-  useEffect(() => { fetchNiches() }, [])
-
-  const fetchNiches = async () => {
+  const fetchNiches = useCallback(async () => {
     try {
       const res = await fetch('/api/niches')
-      if (res.ok) {
-        const data = await res.json()
-        setNiches(data)
-      }
-    } catch (error) {
-      console.error('Failed to fetch niches:', error)
+      if (res.ok) setNiches(await res.json())
+    } catch {
+      error('Failed to load niches')
     } finally {
       setLoading(false)
     }
-  }
+  }, [error])
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this niche?')) return
-    setDeletingId(id)
+  useEffect(() => { fetchNiches() }, [fetchNiches])
+
+  const handleDelete = useCallback(async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
     try {
-      const res = await fetch(`/api/niches/${id}`, { method: 'DELETE' })
-      if (res.ok) setNiches(niches.filter((n) => n.id !== id))
+      const res = await fetch(`/api/niches/${deleteTarget.id}`, { method: 'DELETE' })
+      if (res.ok) {
+        setNiches((prev) => prev.filter((n) => n.id !== deleteTarget.id))
+        success('Niche deleted')
+      } else {
+        error('Failed to delete niche')
+      }
     } catch {
-      alert('Failed to delete')
+      error('Failed to delete niche')
     } finally {
-      setDeletingId(null)
+      setDeleting(false)
+      setDeleteTarget(null)
     }
-  }
+  }, [deleteTarget, success, error])
 
-  const filtered = niches
-    .filter((n) => filterStatus === 'all' || n.status === filterStatus)
-    .sort((a, b) => {
-      const aVal = a[sortBy]
-      const bVal = b[sortBy]
-      if (typeof aVal === 'string' && typeof bVal === 'string') {
-        return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
-      }
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        return sortDir === 'asc' ? aVal - bVal : bVal - aVal
-      }
-      return 0
-    })
+  const filtered = niches.filter((n) => filterStatus === 'all' || n.status === filterStatus)
 
-  if (loading) return <div className="p-6 text-muted-foreground">Loading...</div>
+  const columns: Column<Niche>[] = [
+    { key: 'name', label: 'Niche', sortable: true, render: (n) => <span className="font-medium">{n.name}</span> },
+    {
+      key: 'opportunityScore',
+      label: 'Score',
+      sortable: true,
+      render: (n) => (
+        <div className="flex items-center gap-2">
+          <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all ${n.opportunityScore >= 4 ? 'bg-green-500' : n.opportunityScore >= 3 ? 'bg-yellow-500' : 'bg-red-500'}`}
+              style={{ width: `${(n.opportunityScore / 5) * 100}%` }}
+            />
+          </div>
+          <span className={`text-sm font-semibold ${n.opportunityScore >= 4 ? 'text-green-600' : n.opportunityScore >= 3 ? 'text-yellow-600' : 'text-red-600'}`}>
+            {n.opportunityScore.toFixed(1)}
+          </span>
+        </div>
+      ),
+    },
+    { key: 'status', label: 'Status', render: (n) => <StatusBadge label={n.status} variant={statusColors[n.status] || 'default'} /> },
+    { key: 'updatedAt', label: 'Updated', sortable: true, render: (n) => <span className="text-xs text-muted-foreground">{formatRelativeDate(n.updatedAt)}</span> },
+  ]
 
   return (
-    <div className="p-6 max-w-6xl">
-      <PageHeader
+    <>
+      <ModulePage
         title="Niche Research Hub"
         description="Evaluate and score target niches"
-        action={
-          <button onClick={() => router.push('/niches/new')}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 transition-colors">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            Add Niche
-          </button>
-        }
+        action={<Button onClick={() => router.push('/niches/new')}>Add Niche</Button>}
+        loading={loading && niches.length === 0}
+      >
+        <div className="flex gap-3">
+          <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+            <option value="all">All Statuses</option>
+            <option value="researching">Researching</option>
+            <option value="testing">Testing</option>
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+            <option value="rejected">Rejected</option>
+          </Select>
+        </div>
+
+        <DataTable
+          columns={columns}
+          data={filtered}
+          idKey="id"
+          loading={loading}
+          emptyMessage="No niches match your filters"
+          actions={(niche) => [
+            { label: 'Edit', icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>, onClick: () => router.push(`/niches/${niche.id}`) },
+            { label: 'Delete', icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>, onClick: () => setDeleteTarget(niche), variant: 'danger' },
+          ]}
+        />
+      </ModulePage>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title="Delete Niche"
+        description={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        loading={deleting}
       />
 
-      <div className="flex gap-3 mb-4">
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-          className="h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-          <option value="all">All Statuses</option>
-          <option value="researching">Researching</option>
-          <option value="testing">Testing</option>
-          <option value="active">Active</option>
-          <option value="paused">Paused</option>
-          <option value="rejected">Rejected</option>
-        </select>
-        <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-          className="h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-          <option value="opportunityScore">Sort by Score</option>
-          <option value="name">Sort by Name</option>
-          <option value="createdAt">Sort by Date</option>
-        </select>
-        <button onClick={() => setSortDir(sortDir === 'asc' ? 'desc' : 'asc')}
-          className="h-9 px-3 text-sm border rounded-md bg-background hover:bg-accent transition-colors">
-          {sortDir === 'asc' ? '↑ Asc' : '↓ Desc'}
-        </button>
-      </div>
-
-      {filtered.length === 0 ? (
-        <EmptyState
-          title="No niches yet"
-          description="Add your first niche to start evaluating opportunities"
-          action={{ label: 'Add Niche', onClick: () => router.push('/niches/new') }}
-        />
-      ) : (
-        <div className="border rounded-xl bg-card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="border-b bg-muted/50">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Niche</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Score</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Updated</th>
-                <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((niche) => (
-                <tr key={niche.id} className="border-b last:border-0 hover:bg-muted/30">
-                  <td className="px-4 py-3 font-medium">{niche.name}</td>
-                  <td className="px-4 py-3">
-                    <span className={`font-semibold ${niche.opportunityScore >= 4 ? 'text-green-600' : niche.opportunityScore >= 3 ? 'text-yellow-600' : 'text-red-600'}`}>
-                      {niche.opportunityScore.toFixed(1)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3"><StatusBadge label={niche.status} variant={statusColors[niche.status] || 'default'} /></td>
-                  <td className="px-4 py-3 text-muted-foreground">{new Date(niche.updatedAt).toLocaleDateString()}</td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button onClick={() => router.push(`/niches/${niche.id}`)}
-                        className="text-xs text-primary hover:text-primary/80">Edit</button>
-                      <button onClick={() => handleDelete(niche.id)} disabled={deletingId === niche.id}
-                        className="text-xs text-destructive hover:text-destructive/80 disabled:opacity-50">Delete</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+      {typeof window !== 'undefined' && <ToastContainer toasts={toasts} onDismiss={dismissToast} />}
+    </>
   )
 }

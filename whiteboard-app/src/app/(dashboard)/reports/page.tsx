@@ -1,32 +1,49 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import PageHeader from '@/components/ui/PageHeader'
-import EmptyState from '@/components/ui/EmptyState'
+import { useState } from 'react'
+import ModulePage from '@/components/ui/ModulePage'
+import Button from '@/components/ui/Button'
+import Select from '@/components/ui/Select'
 import StatusBadge from '@/components/ui/StatusBadge'
+import AIReportSection from '@/components/ui/AIReportSection'
+import { useToast, ToastContainer } from '@/components/Toast'
 
 interface ReportData {
   type: string
   generatedAt: string
+  aiAnalysis?: string | null
+  aiAvailable?: boolean
   [key: string]: unknown
 }
 
 export default function ReportsPage() {
+  const { toasts, dismissToast, success, error } = useToast()
   const [report, setReport] = useState<ReportData | null>(null)
   const [loading, setLoading] = useState(false)
   const [reportType, setReportType] = useState('weekly')
+  const [useAi, setUseAi] = useState(true)
 
   const generateReport = async () => {
     setLoading(true)
     setReport(null)
     try {
-      const res = await fetch(`/api/reports?type=${reportType}`)
-      if (res.ok) setReport(await res.json())
+      const aiParam = useAi ? '&ai=true' : ''
+      const res = await fetch(`/api/reports?type=${reportType}${aiParam}`)
+      if (res.ok) {
+        setReport(await res.json())
+        success('Report generated')
+      } else {
+        error('Failed to generate report')
+      }
     } catch {
-      alert('Failed to generate report')
+      error('Failed to generate report')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handlePrint = () => {
+    window.print()
   }
 
   const renderReport = () => {
@@ -34,7 +51,11 @@ export default function ReportsPage() {
 
     if (report.type === 'weekly_review') {
       return (
-        <div className="space-y-6">
+        <div className="space-y-4">
+          {report.aiAnalysis && (
+            <AIReportSection analysis={report.aiAnalysis} loading={false} available={report.aiAvailable ?? false} />
+          )}
+
           <div className="p-4 border rounded-xl bg-card">
             <h3 className="text-sm font-semibold mb-3">Weekly Plan</h3>
             {report.weeklyPlan ? (
@@ -55,7 +76,7 @@ export default function ReportsPage() {
 
           <div className="p-4 border rounded-xl bg-card">
             <h3 className="text-sm font-semibold mb-3">Sales Summary</h3>
-            <div className="grid grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-2 gap-4 text-sm">
               <p><span className="text-muted-foreground">Prospects:</span> {(report.salesSummary as { prospects: number })?.prospects || 0}</p>
               <p><span className="text-muted-foreground">Active Campaigns:</span> {(report.salesSummary as { activeCampaigns: number })?.activeCampaigns || 0}</p>
             </div>
@@ -91,7 +112,11 @@ export default function ReportsPage() {
 
     if (report.type === 'client_report') {
       return (
-        <div className="space-y-6">
+        <div className="space-y-4">
+          {report.aiAnalysis && (
+            <AIReportSection analysis={report.aiAnalysis} loading={false} available={report.aiAvailable ?? false} />
+          )}
+
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 border rounded-xl bg-card">
               <p className="text-sm text-muted-foreground">Total Clients</p>
@@ -124,7 +149,11 @@ export default function ReportsPage() {
 
     if (report.type === 'outreach_report') {
       return (
-        <div className="space-y-6">
+        <div className="space-y-4">
+          {report.aiAnalysis && (
+            <AIReportSection analysis={report.aiAnalysis} loading={false} available={report.aiAvailable ?? false} />
+          )}
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-4 border rounded-xl bg-card">
               <p className="text-sm text-muted-foreground">Total Sent</p>
@@ -146,24 +175,26 @@ export default function ReportsPage() {
           {(report.campaigns as Array<{ id: string; name: string; sentCount: number; replyCount: number }>)?.length > 0 && (
             <div className="p-4 border rounded-xl bg-card">
               <h3 className="text-sm font-semibold mb-3">Campaigns</h3>
-              <table className="w-full text-sm">
-                <thead className="border-b">
-                  <tr>
-                    <th className="text-left py-2 font-medium text-muted-foreground">Name</th>
-                    <th className="text-left py-2 font-medium text-muted-foreground">Sent</th>
-                    <th className="text-left py-2 font-medium text-muted-foreground">Replies</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(report.campaigns as Array<{ id: string; name: string; sentCount: number; replyCount: number }>).map((c) => (
-                    <tr key={c.id} className="border-b last:border-0">
-                      <td className="py-2">{c.name}</td>
-                      <td className="py-2">{c.sentCount}</td>
-                      <td className="py-2">{c.replyCount}</td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="border-b">
+                    <tr>
+                      <th className="text-left py-2 font-medium text-muted-foreground">Name</th>
+                      <th className="text-left py-2 font-medium text-muted-foreground">Sent</th>
+                      <th className="text-left py-2 font-medium text-muted-foreground">Replies</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {(report.campaigns as Array<{ id: string; name: string; sentCount: number; replyCount: number }>).map((c) => (
+                      <tr key={c.id} className="border-b last:border-0">
+                        <td className="py-2">{c.name}</td>
+                        <td className="py-2">{c.sentCount}</td>
+                        <td className="py-2">{c.replyCount}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
@@ -174,39 +205,43 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="p-6 max-w-6xl">
-      <PageHeader
+    <>
+      <ModulePage
         title="Reports"
-        description="Generate internal reports from database records"
-      />
-
-      <div className="p-4 border rounded-xl bg-card mb-6">
-        <div className="flex items-center gap-4">
-          <select value={reportType} onChange={(e) => setReportType(e.target.value)}
-            className="h-10 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-            <option value="weekly">Weekly Business Review</option>
-            <option value="clients">Client Report</option>
-            <option value="outreach">Outreach Report</option>
-          </select>
-          <button onClick={generateReport} disabled={loading}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 disabled:opacity-50 transition-colors">
-            {loading ? 'Generating...' : 'Generate Report'}
-          </button>
+        description="Generate internal reports with optional AI analysis"
+        loading={loading}
+      >
+        <div className="p-4 border rounded-xl bg-card mb-6">
+          <div className="flex flex-wrap items-center gap-4">
+            <Select value={reportType} onChange={(e) => setReportType(e.target.value)}>
+              <option value="weekly">Weekly Business Review</option>
+              <option value="clients">Client Report</option>
+              <option value="outreach">Outreach Report</option>
+            </Select>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" checked={useAi} onChange={(e) => setUseAi(e.target.checked)} className="rounded" />
+              AI Analysis
+            </label>
+            <Button onClick={generateReport} loading={loading}>Generate Report</Button>
+            {report && <Button variant="outline" onClick={handlePrint}>Print</Button>}
+          </div>
         </div>
-      </div>
 
-      {report && (
-        <div className="mb-4 text-xs text-muted-foreground">Generated: {new Date(report.generatedAt as string).toLocaleString()}</div>
-      )}
+        {report && (
+          <div className="mb-4 text-xs text-muted-foreground">Generated: {new Date(report.generatedAt as string).toLocaleString()}</div>
+        )}
 
-      {renderReport()}
+        {renderReport()}
 
-      {!report && !loading && (
-        <EmptyState
-          title="No report generated"
-          description="Select a report type and click Generate"
-        />
-      )}
-    </div>
+        {!report && !loading && (
+          <div className="text-center py-12 border rounded-xl bg-card">
+            <p className="text-sm text-muted-foreground">No report generated</p>
+            <p className="text-xs text-muted-foreground mt-1">Select a report type and click Generate</p>
+          </div>
+        )}
+      </ModulePage>
+
+      {typeof window !== 'undefined' && <ToastContainer toasts={toasts} onDismiss={dismissToast} />}
+    </>
   )
 }

@@ -1,9 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import PageHeader from '@/components/ui/PageHeader'
-import EmptyState from '@/components/ui/EmptyState'
+import { useState, useEffect, useCallback } from 'react'
+import ModulePage from '@/components/ui/ModulePage'
+import DataTable, { Column } from '@/components/ui/DataTable'
+import { ConfirmDialog } from '@/components/ui/Dialog'
+import Button from '@/components/ui/Button'
+import { useToast, ToastContainer } from '@/components/Toast'
+import { formatRelativeDate } from '@/lib/formatters'
 
 interface WeeklyPlan {
   id: string
@@ -25,164 +28,81 @@ interface WeeklyPlan {
   createdAt: string
 }
 
-function getWeekDates() {
-  const now = new Date()
-  const dayOfWeek = now.getDay()
-  const start = new Date(now)
-  start.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
-  start.setHours(0, 0, 0, 0)
-  const end = new Date(start)
-  end.setDate(start.getDate() + 6)
-  end.setHours(23, 59, 59, 999)
-  return { start: start.toISOString(), end: end.toISOString() }
-}
-
-const defaults = {
-  weekStartDate: '',
-  weekEndDate: '',
-  weeklyGoal: '',
-  topPriorities: '',
-  mainMetric: '',
-  whatWorked: '',
-  whatDidNotWork: '',
-  mainBottleneck: '',
-  salesActions: '',
-  fulfillmentActions: '',
-  systemActions: '',
-  delegatedTasks: '',
-  stoppedTasks: '',
-  previousWeekReview: '',
-  notes: '',
-}
-
 export default function WeeklyPlanningPage() {
-  const router = useRouter()
+  const { toasts, dismissToast, success, error } = useToast()
   const [plans, setPlans] = useState<WeeklyPlan[]>([])
   const [loading, setLoading] = useState(true)
-  const [form, setForm] = useState({ ...defaults, ...getWeekDates() })
-  const [saving, setSaving] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<WeeklyPlan | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
-  useEffect(() => { fetchPlans() }, [])
-
-  const fetchPlans = async () => {
+  const fetchPlans = useCallback(async () => {
     try {
       const res = await fetch('/api/weekly-plans')
       if (res.ok) setPlans(await res.json())
-    } catch { /* ignore */ } finally { setLoading(false) }
-  }
+    } catch {
+      error('Failed to load plans')
+    } finally {
+      setLoading(false)
+    }
+  }, [error])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
+  useEffect(() => { fetchPlans() }, [fetchPlans])
+
+  const handleDelete = useCallback(async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
     try {
-      const res = await fetch('/api/weekly-plans', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
+      const res = await fetch(`/api/weekly-plans/${deleteTarget.id}`, { method: 'DELETE' })
       if (res.ok) {
-        const saved = await res.json()
-        setPlans([saved, ...plans])
-        setForm({ ...defaults, ...getWeekDates() })
+        setPlans((prev) => prev.filter((p) => p.id !== deleteTarget.id))
+        success('Plan deleted')
+      } else {
+        error('Failed to delete plan')
       }
-    } catch { /* ignore */ } finally { setSaving(false) }
-  }
+    } catch {
+      error('Failed to delete plan')
+    } finally {
+      setDeleting(false)
+      setDeleteTarget(null)
+    }
+  }, [deleteTarget, success, error])
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this plan?')) return
-    try {
-      const res = await fetch(`/api/weekly-plans/${id}`, { method: 'DELETE' })
-      if (res.ok) setPlans(plans.filter((p) => p.id !== id))
-    } catch { /* ignore */ }
-  }
-
-  if (loading) return <div className="p-6 text-muted-foreground">Loading...</div>
+  const columns: Column<WeeklyPlan>[] = [
+    { key: 'weeklyGoal', label: 'Weekly Goal', sortable: true, render: (p) => <span className="font-medium truncate block max-w-xs">{p.weeklyGoal || '-'}</span> },
+    { key: 'mainMetric', label: 'Main Metric', render: (p) => <span className="text-muted-foreground truncate block max-w-xs">{p.mainMetric || '-'}</span> },
+    { key: 'weekStartDate', label: 'Week', sortable: true, render: (p) => <span className="text-xs text-muted-foreground">{formatRelativeDate(p.weekStartDate)}</span> },
+  ]
 
   return (
-    <div className="p-6 max-w-4xl">
-      <PageHeader title="Weekly Planning" description="Set goals and review progress each week" />
+    <>
+      <ModulePage
+        title="Weekly Planning"
+        description="Set goals and review progress each week"
+        loading={loading && plans.length === 0}
+      >
+        <DataTable
+          columns={columns}
+          data={plans}
+          idKey="id"
+          loading={loading}
+          emptyMessage="No weekly plans yet"
+          actions={(plan) => [
+            { label: 'View', icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>, onClick: () => {} },
+            { label: 'Delete', icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>, onClick: () => setDeleteTarget(plan), variant: 'danger' },
+          ]}
+        />
+      </ModulePage>
 
-      <form onSubmit={handleSubmit} className="p-4 border rounded-xl bg-card space-y-4 mb-6">
-        <h3 className="text-sm font-semibold">This Week: {new Date(form.weekStartDate).toLocaleDateString()} — {new Date(form.weekEndDate).toLocaleDateString()}</h3>
-        <div>
-          <label className="block text-sm font-medium mb-1">Weekly Goal</label>
-          <input type="text" value={form.weeklyGoal} onChange={(e) => setForm({ ...form, weeklyGoal: e.target.value })}
-            className="w-full h-10 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" placeholder="What's the #1 thing this week?" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Main Metric</label>
-          <input type="text" value={form.mainMetric} onChange={(e) => setForm({ ...form, mainMetric: e.target.value })}
-            className="w-full h-10 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" placeholder="What metric matters most?" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Top Priorities</label>
-          <textarea value={form.topPriorities} onChange={(e) => setForm({ ...form, topPriorities: e.target.value })} rows={3}
-            className="w-full px-3 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" placeholder="1. ...&#10;2. ...&#10;3. ..." />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Sales Actions</label>
-            <textarea value={form.salesActions} onChange={(e) => setForm({ ...form, salesActions: e.target.value })} rows={3}
-              className="w-full px-3 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Fulfillment Actions</label>
-            <textarea value={form.fulfillmentActions} onChange={(e) => setForm({ ...form, fulfillmentActions: e.target.value })} rows={3}
-              className="w-full px-3 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">System Actions</label>
-            <textarea value={form.systemActions} onChange={(e) => setForm({ ...form, systemActions: e.target.value })} rows={3}
-              className="w-full px-3 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Delegated Tasks</label>
-            <textarea value={form.delegatedTasks} onChange={(e) => setForm({ ...form, delegatedTasks: e.target.value })} rows={2}
-              className="w-full px-3 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Stopped Tasks</label>
-            <textarea value={form.stoppedTasks} onChange={(e) => setForm({ ...form, stoppedTasks: e.target.value })} rows={2}
-              className="w-full px-3 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Main Bottleneck</label>
-            <textarea value={form.mainBottleneck} onChange={(e) => setForm({ ...form, mainBottleneck: e.target.value })} rows={2}
-              className="w-full px-3 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Notes</label>
-          <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2}
-            className="w-full px-3 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-        </div>
-        <button type="submit" disabled={saving}
-          className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 disabled:opacity-50 transition-colors">
-          {saving ? 'Saving...' : 'Save Plan'}
-        </button>
-      </form>
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title="Delete Plan"
+        description={`Are you sure you want to delete the plan for "${deleteTarget?.weeklyGoal || 'this week'}"? This action cannot be undone.`}
+        loading={deleting}
+      />
 
-      {plans.length === 0 ? (
-        <EmptyState title="No plans yet" description="Create your first weekly plan above" />
-      ) : (
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold">Past Plans</h3>
-          {plans.map((plan) => (
-            <div key={plan.id} className="p-4 border rounded-xl bg-card">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">
-                  {new Date(plan.weekStartDate).toLocaleDateString()} — {new Date(plan.weekEndDate).toLocaleDateString()}
-                </span>
-                <button onClick={() => handleDelete(plan.id)} className="text-xs text-destructive hover:text-destructive/80">Delete</button>
-              </div>
-              {plan.weeklyGoal && <p className="text-sm"><span className="text-muted-foreground">Goal:</span> {plan.weeklyGoal}</p>}
-              {plan.topPriorities && <p className="text-sm mt-1"><span className="text-muted-foreground">Priorities:</span> {plan.topPriorities}</p>}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+      {typeof window !== 'undefined' && <ToastContainer toasts={toasts} onDismiss={dismissToast} />}
+    </>
   )
 }

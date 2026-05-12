@@ -105,3 +105,35 @@
 - **Decision**: Create PHASE_4_PLAN.md, update README.md, create OPERATOR_MANUAL.md
 - **Reason**: All phases are now complete. Documentation needed to reflect the final state.
 - **Date**: 2026-05-12
+
+## AI Enhancement Decisions
+
+### 7. OpenAI Integration Strategy
+- **Decision**: Use OpenAI SDK directly (not a wrapper service), with all AI calls server-side
+- **Reason**: Full control over prompts, no vendor lock-in, all business logic stays in codebase. Client never sees the API key.
+- **Date**: 2026-05-12
+
+### 8. Graceful Degradation Pattern
+- **Decision**: All AI features use `withFallback()` — if OPENAI_API_KEY is unset, modules work identically to their pre-AI state
+- **Reason**: The app must be fully functional without AI. AI is an enhancement layer, not a dependency.
+- **Date**: 2026-05-12
+
+### 9. Model Selection
+- **Decision**: Use GPT-4o-mini for all AI features (column mapping, data cleaning, metrics narrative, anomaly detection, report analysis)
+- **Reason**: Cost-effective (~$0.05/month estimated), fast enough for all use cases, sufficient quality for business analysis
+- **Date**: 2026-05-12
+
+### 10. Charting Library
+- **Decision**: Use Recharts for Metrics page visualizations
+- **Reason**: Most popular React charting lib, tree-shakeable, good dark-mode support, sufficient for internal tooling
+- **Date**: 2026-05-12
+
+### 11. CSV Import Flow
+- **Decision**: CSV parsing via PapaParse, AI mapping/cleaning via dedicated API routes, bulk insert into existing Prisma models
+- **Reason**: Separation of concerns — parsing is deterministic, AI suggestions are advisory. User always has manual override on mappings.
+- **Date**: 2026-05-12
+
+### 12. AI API Route Location
+- **Decision**: New AI routes nested under existing modules (`/api/imports/ai-map`, `/api/metrics/narrative`, etc.)
+- **Reason**: Keeps AI logic co-located with the module it serves. New routes don't affect existing routes. Middleware auth covers all `/api/*` routes.
+- **Date**: 2026-05-12

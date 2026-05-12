@@ -67,5 +67,4 @@ One person: the business owner. No other users, no roles, no permissions.
 - No billing/invoicing system
 - No real-time collaboration
 - No mobile app
-- No AI features (yet)
 - No external API integrations (yet)
